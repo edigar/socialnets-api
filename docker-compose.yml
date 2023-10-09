@@ -1,0 +1,36 @@
+version: '3.7'
+networks:
+  socialnets:
+    driver: bridge
+services:
+  database:
+    image: "postgres"
+    container_name: socialnets-db
+    env_file:
+      - ./.env
+    environment:
+      - TZ=GMT+3
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - socialnets
+  api:
+     build: .
+     image: socialnets-api
+     container_name: socialnets-api
+     environment:
+       - ENVIRONMENT=PROD
+       - DB_HOST=socialnets-db
+     env_file:
+       - ./.env
+     ports:
+       - 80:${API_PORT}
+     networks:
+       - socialnets
+     depends_on:
+       - database
