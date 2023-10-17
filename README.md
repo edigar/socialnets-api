@@ -13,7 +13,12 @@ If you use [docker](https://www.docker.com/), here you will find a complete envi
 
 Clone or download this repository.
 
-Copy `.env.example` to `.env`. You must set `SECRET_KEY` in this file, which can literally be any string. However, you can generate a `SECRET_KEY` with the following Go code, which will print it in the prompt. After that, simply copy the generated hash to the `.env` file.
+Copy `.env.example` to `.env`.
+
+> [!IMPORTANT]
+> You must set `SECRET_KEY` in this file, which can literally be any string.
+
+However, you can generate a `SECRET_KEY` with the following Go code, which will print it in the prompt. After that, simply copy the generated hash to the `.env` file.
 
 ```Go
 package main
@@ -46,11 +51,7 @@ You can run with docker by building the image and running it.
 Execute:
 
 ```bash
-# Build/start container
 docker-compose up
-
-# Generates jwt secret
-docker exec -ti marketplace_api php artisan jwt:secret
 ```
 
 You'll have API running on http://localhost
@@ -97,16 +98,16 @@ After starting application, you'll have access to following routes:
 |  POST  | /api/user/{userId}/follow          |      Yes       | Logged user follows an user             |
 |  POST  | /api/user/{userId}/unfollow        |      Yes       | Logged user unfollows an user           |
 |  GET   | /api/user/{userId}/followers       |      Yes       | Get all followers by an user            |
-|  GET   | /api/user/{userId}/following       |      YES       | Gets all users who are following a user |
-|  POST  | /api/user/{userId}/update-password |      YES       | Update password user                    |
-|  POST  | /api/post                          |      YES       | Create a post                           |
-|  GET   | /api/post                          |      YES       | Get all post for a logged user          |
-|  GET   | /api/post/{postId}                 |      YES       | Get a post                              |
-|  PUT   | /api/post/{postId}                 |      YES       | Update a post                           |
-| DELETE | /api/post/{postId}                 |      YES       | Delete a post                           |
-|  GET   | /api/user/{userId}/posts           |      YES       | Gets all posts from a user              |
-|  POST  | /api/post/{postId}/like            |      YES       | Like a user post                        |
-|  POST  | /api/post/{postId}/unlike          |      YES       | Unlike a user post                      |
+|  GET   | /api/user/{userId}/following       |      Yes       | Gets all users who are following a user |
+|  POST  | /api/user/{userId}/update-password |      Yes       | Update password user                    |
+|  POST  | /api/post                          |      Yes       | Create a post                           |
+|  GET   | /api/post                          |      Yes       | Get all post for a logged user          |
+|  GET   | /api/post/{postId}                 |      Yes       | Get a post                              |
+|  PUT   | /api/post/{postId}                 |      Yes       | Update a post                           |
+| DELETE | /api/post/{postId}                 |      Yes       | Delete a post                           |
+|  GET   | /api/user/{userId}/posts           |      Yes       | Gets all posts from a user              |
+|  POST  | /api/post/{postId}/like            |      Yes       | Like a user post                        |
+|  POST  | /api/post/{postId}/unlike          |      Yes       | Unlike a user post                      |
 
 Authentication, once performed with login (email) and password on `/api/login`, is maintained via a JWT Bearer Token.
 
