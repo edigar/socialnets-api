@@ -55,8 +55,8 @@ func (r PostRepository) GetById(postId uint64) (models.Post, error) {
 func (r PostRepository) GetByUser(userId uint64) ([]models.Post, error) {
 	rows, err := r.db.Query(
 		`SELECT DISTINCT p.*, u.nick FROM posts p
-		INNER JOIN users u ON u.id = p.author
-		INNER JOIN followers f ON p.author = f.user_i WHERE u.id = $1 OR f.follower = $1
+		LEFT JOIN users u ON u.id = p.author
+		LEFT JOIN followers f ON p.author = f.user_id WHERE u.id = $1 OR f.follower = $1
 		ORDER BY 1 desc`,
 		userId,
 	)
