@@ -2,7 +2,7 @@ package authentication
 
 import (
 	"fmt"
-	"github.com/edigar/socialnets-api/src/config"
+	"github.com/edigar/socialnets-api/internal/config"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"strconv"

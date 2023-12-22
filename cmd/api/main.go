@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/edigar/socialnets-api/src/config"
-	"github.com/edigar/socialnets-api/src/router"
+	"github.com/edigar/socialnets-api/internal/config"
+	"github.com/edigar/socialnets-api/internal/router"
 	"log"
 	"net/http"
 )

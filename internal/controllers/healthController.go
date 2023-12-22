@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/edigar/socialnets-api/src/responses"
+	"github.com/edigar/socialnets-api/internal/responses"
 	"net/http"
 )
 

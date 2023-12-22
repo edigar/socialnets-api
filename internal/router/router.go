@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/edigar/socialnets-api/src/router/routes"
+	"github.com/edigar/socialnets-api/internal/router/routes"
 	"github.com/gorilla/mux"
 )
 

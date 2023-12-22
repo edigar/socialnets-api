@@ -2,7 +2,7 @@ package database
 
 import (
 	"database/sql"
-	"github.com/edigar/socialnets-api/src/config"
+	"github.com/edigar/socialnets-api/internal/config"
 
 	_ "github.com/lib/pq"
 )

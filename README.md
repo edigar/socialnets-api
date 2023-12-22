@@ -65,7 +65,7 @@ Set database configuration on `.env` file and create the database. In docker fol
 go mod tidy
 
 # Start application
-go run main.go
+go run ./cmd/api/main.go
 ```
 
 If you want to generate the executable, use:
@@ -74,10 +74,10 @@ If you want to generate the executable, use:
 go mod tidy
 
 # Generate executable
-go build
+go build ./cmd/api
 
 # Start application
-./socialnets-api
+./api
 ```
 
 You'll have API running on http://localhost:8000 (if you don't change `API_PORT` on `.env`).

@@ -3,7 +3,7 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
-	"github.com/edigar/socialnets-api/src/models"
+	"github.com/edigar/socialnets-api/internal/models"
 	"time"
 )
 

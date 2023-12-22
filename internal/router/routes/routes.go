@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"github.com/edigar/socialnets-api/src/middlewares"
+	"github.com/edigar/socialnets-api/internal/middlewares"
 	"github.com/gorilla/mux"
 	"net/http"
 )

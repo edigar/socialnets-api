@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/edigar/socialnets-api/src/authentication"
-	"github.com/edigar/socialnets-api/src/crypt"
-	"github.com/edigar/socialnets-api/src/database"
-	"github.com/edigar/socialnets-api/src/models"
-	"github.com/edigar/socialnets-api/src/repositories"
-	"github.com/edigar/socialnets-api/src/responses"
+	"github.com/edigar/socialnets-api/internal/authentication"
+	"github.com/edigar/socialnets-api/internal/database"
+	"github.com/edigar/socialnets-api/internal/models"
+	"github.com/edigar/socialnets-api/internal/repositories"
+	"github.com/edigar/socialnets-api/internal/responses"
+	"github.com/edigar/socialnets-api/pkg/crypt"
 	"io"
 	"net/http"
 	"strconv"

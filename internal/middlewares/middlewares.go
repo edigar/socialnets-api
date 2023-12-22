@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"github.com/edigar/socialnets-api/src/authentication"
-	"github.com/edigar/socialnets-api/src/responses"
+	"github.com/edigar/socialnets-api/internal/authentication"
+	"github.com/edigar/socialnets-api/internal/responses"
 	"log"
 	"net/http"
 )

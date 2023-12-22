@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY . ./
 
-RUN CGO_ENABLED=0 go build -o /app
+RUN CGO_ENABLED=0 go build -o /app /app/cmd/api
 
 #--------
 FROM gcr.io/distroless/base-debian10
@@ -18,4 +18,4 @@ EXPOSE 8000
 
 USER nonroot:nonroot
 
-ENTRYPOINT [ "/app/socialnets-api" ]
+ENTRYPOINT [ "/app/api" ]

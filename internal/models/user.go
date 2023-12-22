@@ -3,7 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
-	"github.com/edigar/socialnets-api/src/crypt"
+	"github.com/edigar/socialnets-api/pkg/crypt"
 	"net/mail"
 	"regexp"
 	"strings"

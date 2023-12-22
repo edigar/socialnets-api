@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"database/sql"
-	"github.com/edigar/socialnets-api/src/models"
+	"github.com/edigar/socialnets-api/internal/models"
 )
 
 type PostRepository struct {
