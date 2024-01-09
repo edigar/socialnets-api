@@ -141,7 +141,7 @@ Soon a [swagger](https://swagger.io/docs/specification/2-0/what-is-swagger/) doc
 - [ ] Add [GORM](https://gorm.io) to the project
 - [ ] Improve tests
 - [ ] Add [Swagger](https://swagger.io) documentation
-- [ ] Implements UUID for users and posts Ids
+- [x] Implements UUID for user's Id
 - [ ] Register who liked a post, so that each user can only like each post once, in addition to having information on who liked each post. 
     + [ ] Add likes table
     + [ ] Control who like or unlike a post.

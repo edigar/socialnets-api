@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/edigar/socialnets-api/internal/authentication"
 	"github.com/edigar/socialnets-api/internal/database"
 	"github.com/edigar/socialnets-api/internal/models"
@@ -197,11 +198,8 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 
 func GetUserPosts(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userId, err := strconv.ParseUint(params["userId"], 10, 64)
-	if err != nil {
-		responses.Error(w, http.StatusBadRequest, err)
-		return
-	}
+	userId := fmt.Sprintf("%s", params["userId"])
+
 	db, err := database.Connect()
 	if err != nil {
 		responses.Error(w, http.StatusInternalServerError, err)

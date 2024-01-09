@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/edigar/socialnets-api/internal/authentication"
 	"github.com/edigar/socialnets-api/internal/database"
 	"github.com/edigar/socialnets-api/internal/models"
@@ -12,7 +13,6 @@ import (
 	"github.com/gorilla/mux"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -72,11 +72,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userId, err := strconv.ParseUint(params["userId"], 10, 64)
-	if err != nil {
-		responses.Error(w, http.StatusBadRequest, err)
-		return
-	}
+	userId := fmt.Sprintf("%s", params["userId"])
 
 	db, err := database.Connect()
 	if err != nil {
@@ -103,11 +99,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userId, err := strconv.ParseUint(params["userId"], 10, 64)
-	if err != nil {
-		responses.Error(w, http.StatusBadRequest, err)
-		return
-	}
+	userId := fmt.Sprintf("%s", params["userId"])
 
 	tokenUserId, err := authentication.ExtractUserId(r)
 	if err != nil {
@@ -153,11 +145,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userId, err := strconv.ParseUint(params["userId"], 10, 64)
-	if err != nil {
-		responses.Error(w, http.StatusBadRequest, err)
-		return
-	}
+	userId := fmt.Sprintf("%s", params["userId"])
 
 	tokenUserId, err := authentication.ExtractUserId(r)
 	if err != nil {
@@ -192,11 +180,7 @@ func Follow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := mux.Vars(r)
-	userId, err := strconv.ParseUint(params["userId"], 10, 64)
-	if err != nil {
-		responses.Error(w, http.StatusBadRequest, err)
-		return
-	}
+	userId := fmt.Sprintf("%s", params["userId"])
 
 	if follower == userId {
 		responses.Error(w, http.StatusForbidden, errors.New("operation denied"))
@@ -227,11 +211,7 @@ func Unfollow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := mux.Vars(r)
-	userId, err := strconv.ParseUint(params["userId"], 10, 64)
-	if err != nil {
-		responses.Error(w, http.StatusBadRequest, err)
-		return
-	}
+	userId := fmt.Sprintf("%s", params["userId"])
 
 	if follower == userId {
 		responses.Error(w, http.StatusForbidden, errors.New("operation denied"))
@@ -256,11 +236,7 @@ func Unfollow(w http.ResponseWriter, r *http.Request) {
 
 func GetFollowers(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userId, err := strconv.ParseUint(params["userId"], 10, 64)
-	if err != nil {
-		responses.Error(w, http.StatusBadRequest, err)
-		return
-	}
+	userId := fmt.Sprintf("%s", params["userId"])
 
 	db, err := database.Connect()
 	if err != nil {
@@ -281,11 +257,7 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 
 func GetFollowing(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userId, err := strconv.ParseUint(params["userId"], 10, 64)
-	if err != nil {
-		responses.Error(w, http.StatusBadRequest, err)
-		return
-	}
+	userId := fmt.Sprintf("%s", params["userId"])
 
 	db, err := database.Connect()
 	if err != nil {
@@ -305,11 +277,7 @@ func GetFollowing(w http.ResponseWriter, r *http.Request) {
 }
 func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	userId, err := strconv.ParseUint(params["userId"], 10, 64)
-	if err != nil {
-		responses.Error(w, http.StatusBadRequest, err)
-		return
-	}
+	userId := fmt.Sprintf("%s", params["userId"])
 
 	tokenUserId, err := authentication.ExtractUserId(r)
 	if err != nil {

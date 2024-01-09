@@ -10,7 +10,6 @@ import (
 	"github.com/edigar/socialnets-api/pkg/crypt"
 	"io"
 	"net/http"
-	"strconv"
 )
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +49,5 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId := strconv.FormatUint(userDb.Id, 10)
-
-	responses.JSON(w, http.StatusOK, models.AuthenticationDTO{Id: userId, Token: token})
+	responses.JSON(w, http.StatusOK, models.AuthenticationDTO{Id: userDb.Id, Token: token})
 }

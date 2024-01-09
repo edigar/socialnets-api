@@ -6,12 +6,11 @@ import (
 	"github.com/edigar/socialnets-api/internal/config"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 )
 
-func CreateToken(userId uint64) (string, error) {
+func CreateToken(userId string) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["exp"] = time.Now().Add(time.Hour * 6).Unix()
@@ -35,23 +34,20 @@ func TokenValidate(r *http.Request) error {
 	return errors.New("invalid token")
 }
 
-func ExtractUserId(r *http.Request) (uint64, error) {
+func ExtractUserId(r *http.Request) (string, error) {
 	tokenString := extractToken(r)
 	token, err := jwt.Parse(tokenString, getVerificationKey)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userId, err := strconv.ParseUint(fmt.Sprintf("%.0f", claims["userId"]), 10, 64)
-		if err != nil {
-			return 0, err
-		}
+		userId := fmt.Sprintf("%s", claims["userId"])
 
 		return userId, nil
 	}
 
-	return 0, errors.New("invalid token")
+	return "", errors.New("invalid token")
 }
 
 func extractToken(r *http.Request) string {

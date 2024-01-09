@@ -52,7 +52,7 @@ func (r PostRepository) GetById(postId uint64) (models.Post, error) {
 	return post, nil
 }
 
-func (r PostRepository) GetByUser(userId uint64) ([]models.Post, error) {
+func (r PostRepository) GetByUser(userId string) ([]models.Post, error) {
 	rows, err := r.db.Query(
 		`SELECT DISTINCT p.*, u.nick FROM posts p
 		LEFT JOIN users u ON u.id = p.author
@@ -107,7 +107,7 @@ func (r PostRepository) Delete(postId uint64) error {
 	return nil
 }
 
-func (r PostRepository) GetUserPosts(userId uint64) ([]models.Post, error) {
+func (r PostRepository) GetUserPosts(userId string) ([]models.Post, error) {
 	rows, err := r.db.Query(
 		"SELECT p.*, u.nick FROM posts p JOIN users u ON u.id = p.author WHERE p.author = $1",
 		userId,
