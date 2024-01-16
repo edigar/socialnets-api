@@ -90,7 +90,7 @@ After starting application, you'll have access to following routes:
 |:------:|------------------------------------|:--------------:|-----------------------------------------|
 |  GET   | /health                            |       No       | Application status health check         |
 |  POST  | /api/login                         |       No       | User login                              |
-|  POST  | /api/user                          |      Yes       | Create an user                          |
+|  POST  | /api/user                          |       No       | Create an user                          |
 |  GET   | /api/user                          |      Yes       | Search for users                        |
 |  GET   | /api/user/{userId}                 |      Yes       | Get an user data                        |
 |  PUT   | /api/user/{userId}                 |      Yes       | Update an user data                     |
