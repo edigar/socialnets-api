@@ -1,9 +1,11 @@
-package models
+package entity
 
 import (
 	"testing"
 	"time"
 )
+
+const AUTHOR_ID = "$2a$10$6u7eR7kXjapXbv2HvJ3VBeKtwEsMU90aetwW0P3X7.Se.BgOJWL4C"
 
 type PostScenarios struct {
 	post     Post
@@ -15,16 +17,16 @@ func TestPostPrepare(t *testing.T) {
 		createdAt := time.Now()
 		scenarios := []PostScenarios{
 			{
-				Post{1, "test title", "test content", 1, "nick", 0, createdAt},
-				Post{1, "test title", "test content", 1, "nick", 0, createdAt},
+				Post{1, "test title", "test content", AUTHOR_ID, "nick", 0, createdAt},
+				Post{1, "test title", "test content", AUTHOR_ID, "nick", 0, createdAt},
 			},
 			{
-				Post{1, "   test title   ", "  test content   ", 1, "nick", 0, createdAt},
-				Post{1, "test title", "test content", 1, "nick", 0, createdAt},
+				Post{1, "   test title   ", "  test content   ", AUTHOR_ID, "nick", 0, createdAt},
+				Post{1, "test title", "test content", AUTHOR_ID, "nick", 0, createdAt},
 			},
 			{
-				Post{1, " test  title ", " test  content ", 1, "nick", 0, createdAt},
-				Post{1, "test  title", "test  content", 1, "nick", 0, createdAt},
+				Post{1, " test  title ", " test  content ", AUTHOR_ID, "nick", 0, createdAt},
+				Post{1, "test  title", "test  content", AUTHOR_ID, "nick", 0, createdAt},
 			},
 		}
 
@@ -46,7 +48,7 @@ func TestPostPrepare(t *testing.T) {
 
 	t.Run("Should return error if title is empty", func(t *testing.T) {
 		createdAt := time.Now()
-		post := Post{1, "", "content", 1, "nick", 0, createdAt}
+		post := Post{1, "", "content", AUTHOR_ID, "nick", 0, createdAt}
 		err := post.Prepare()
 
 		if err.Error() != "title is required" {
@@ -56,7 +58,7 @@ func TestPostPrepare(t *testing.T) {
 
 	t.Run("Should return error if content is empty", func(t *testing.T) {
 		createdAt := time.Now()
-		post := Post{1, "title", "", 1, "nick", 0, createdAt}
+		post := Post{1, "title", "", AUTHOR_ID, "nick", 0, createdAt}
 		err := post.Prepare()
 
 		if err.Error() != "content is required" {
