@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"github.com/edigar/socialnets-api/internal/middlewares"
+	"github.com/edigar/socialnets-api/internal/middleware"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -21,9 +21,9 @@ func Setup(r *mux.Router) *mux.Router {
 
 	for _, route := range routes {
 		if route.AuthenticationRequired {
-			r.HandleFunc(route.URI, middlewares.Logger(middlewares.Authenticate(route.Function))).Methods(route.Method)
+			r.HandleFunc(route.URI, middleware.Logger(middleware.Authenticate(route.Function))).Methods(route.Method)
 		} else {
-			r.HandleFunc(route.URI, middlewares.Logger(route.Function)).Methods(route.Method)
+			r.HandleFunc(route.URI, middleware.Logger(route.Function)).Methods(route.Method)
 		}
 	}
 

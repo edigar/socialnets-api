@@ -1,8 +1,8 @@
-package models
+package entity
 
 import (
-	"errors"
 	"fmt"
+	"github.com/edigar/socialnets-api/internal/error_type"
 	"github.com/edigar/socialnets-api/pkg/crypt"
 	"net/mail"
 	"regexp"
@@ -33,27 +33,27 @@ func (user *User) Prepare(step string) error {
 
 func (user *User) validate(step string) error {
 	if user.Name == "" {
-		return errors.New("username is required")
+		return errorType.NewErrorUserValidation("username is required")
 	}
 
 	if !regexp.MustCompile("^[A-Za-z\\s]{3,}$").MatchString(user.Name) {
-		return errors.New("username must have three or more characters")
+		return errorType.NewErrorUserValidation("username must have three or more characters")
 	}
 
 	if user.Nick == "" {
-		return errors.New("nick is required")
+		return errorType.NewErrorUserValidation("nick is required")
 	}
 
 	if user.Email == "" {
-		return errors.New("email is required")
+		return errorType.NewErrorUserValidation("email is required")
 	}
 
 	if _, err := mail.ParseAddress(user.Email); err != nil {
-		return errors.New(fmt.Sprintf("invalid email. %s", err))
+		return errorType.NewErrorUserValidation(fmt.Sprintf("invalid email. %s", err))
 	}
 
 	if step == "register" && user.Password == "" {
-		return errors.New("password is required")
+		return errorType.NewErrorUserValidation("password is required")
 	}
 
 	return nil

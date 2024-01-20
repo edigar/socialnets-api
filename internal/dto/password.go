@@ -1,4 +1,4 @@
-package models
+package dto
 
 type Password struct {
 	New     string `json:"new"`

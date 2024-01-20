@@ -1,16 +1,14 @@
 package authentication
 
 import (
-	"fmt"
 	"github.com/edigar/socialnets-api/internal/config"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
-	"strconv"
 	"testing"
 )
 
 func TestCreateToken(t *testing.T) {
-	userId := uint64(123)
+	userId := "$2a$10$6u7eR7kXjapXbv2HvJ3VBeKtwEsMU90aetwW0P3X7.Se.BgOJWL4C"
 	token, err := CreateToken(userId)
 	if err != nil {
 		t.Errorf("CreateToken should not return an error for a valid uint64: %v", err)
@@ -34,7 +32,7 @@ func TestCreateToken(t *testing.T) {
 		t.Errorf("Token should have an exp claim not nil")
 	}
 
-	tokenUserId, err := strconv.ParseUint(fmt.Sprintf("%.0f", claims["userId"]), 10, 64)
+	tokenUserId := claims["userId"]
 	if err != nil {
 		t.Errorf("ParseUint of userId claims should not return an error: %v", err)
 	}
@@ -44,7 +42,7 @@ func TestCreateToken(t *testing.T) {
 }
 
 func TestTokenValidateValidToken(t *testing.T) {
-	userId := uint64(123)
+	userId := "$2a$10$6u7eR7kXjapXbv2HvJ3VBeKtwEsMU90aetwW0P3X7.Se.BgOJWL4C"
 	token, err := CreateToken(userId)
 	if err != nil {
 		t.Errorf("CreateToken should not return an error for a valid uint64: %v", err)
@@ -73,7 +71,7 @@ func TestTokenValidateInvalidToken(t *testing.T) {
 }
 
 func TestExtractUserIdValidToken(t *testing.T) {
-	userId := uint64(123)
+	userId := "$2a$10$6u7eR7kXjapXbv2HvJ3VBeKtwEsMU90aetwW0P3X7.Se.BgOJWL4C"
 	token, err := CreateToken(userId)
 	if err != nil {
 		t.Errorf("CreateToken should not return an error")

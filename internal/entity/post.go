@@ -1,7 +1,7 @@
-package models
+package entity
 
 import (
-	"errors"
+	errorType "github.com/edigar/socialnets-api/internal/error_type"
 	"strings"
 	"time"
 )
@@ -27,11 +27,10 @@ func (post *Post) Prepare() error {
 
 func (post *Post) validate() error {
 	if post.Title == "" {
-		return errors.New("title is required")
+		return errorType.NewErrorPostValidation("title is required")
 	}
-
 	if post.Content == "" {
-		return errors.New("content is required")
+		return errorType.NewErrorPostValidation("content is required")
 	}
 
 	return nil

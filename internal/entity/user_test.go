@@ -1,9 +1,11 @@
-package models
+package entity
 
 import (
 	"testing"
 	"time"
 )
+
+const USER_ID = "$2a$10$6u7eR7kXjapXbv2HvJ3VBeKtwEsMU90aetwW0P3X7.Se.BgOJWL4C"
 
 type UserScenarios struct {
 	user     User
@@ -16,7 +18,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 		scenarios := []UserScenarios{
 			{
 				User{
-					Id:        1,
+					Id:        USER_ID,
 					Name:      "teste name",
 					Nick:      "nick",
 					Email:     "name@mail.com",
@@ -24,7 +26,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 					CreatedAt: createdAt,
 				},
 				User{
-					Id:        1,
+					Id:        USER_ID,
 					Name:      "teste name",
 					Nick:      "nick",
 					Email:     "name@mail.com",
@@ -34,7 +36,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 			},
 			{
 				User{
-					Id:        1,
+					Id:        USER_ID,
 					Name:      "  teste name    ",
 					Nick:      "   nick  ",
 					Email:     "    name@mail.com   ",
@@ -42,7 +44,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 					CreatedAt: createdAt,
 				},
 				User{
-					Id:        1,
+					Id:        USER_ID,
 					Name:      "teste name",
 					Nick:      "nick",
 					Email:     "name@mail.com",
@@ -52,7 +54,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 			},
 			{
 				User{
-					Id:        1,
+					Id:        USER_ID,
 					Name:      "  teste  name    ",
 					Nick:      "   nick  ",
 					Email:     "    name@mail.com   ",
@@ -60,7 +62,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 					CreatedAt: createdAt,
 				},
 				User{
-					Id:        1,
+					Id:        USER_ID,
 					Name:      "teste  name",
 					Nick:      "nick",
 					Email:     "name@mail.com",
@@ -88,7 +90,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 
 	t.Run("Should generate password hash with valid user on register step", func(t *testing.T) {
 		createdAt := time.Now()
-		user := User{Id: 1, Name: "Name", Nick: "nick", Email: "name@mail", Password: "123", CreatedAt: createdAt}
+		user := User{Id: USER_ID, Name: "Name", Nick: "nick", Email: "name@mail", Password: "123", CreatedAt: createdAt}
 		err := user.Prepare("register")
 
 		if err != nil {
@@ -101,7 +103,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 
 	t.Run("Should return an error if name has less 3 characters", func(t *testing.T) {
 		createdAt := time.Now()
-		user := User{Id: 1, Name: "ab", Nick: "nick", Email: "name@mail.com", Password: "123", CreatedAt: createdAt}
+		user := User{Id: USER_ID, Name: "ab", Nick: "nick", Email: "name@mail.com", Password: "123", CreatedAt: createdAt}
 		err := user.Prepare("no register")
 
 		if err.Error() != "username must have three or more characters" {
@@ -111,7 +113,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 
 	t.Run("Should return an error if name has a non character", func(t *testing.T) {
 		createdAt := time.Now()
-		user := User{Id: 1, Name: "name1", Nick: "nick", Email: "name@mail.com", Password: "123", CreatedAt: createdAt}
+		user := User{Id: USER_ID, Name: "name1", Nick: "nick", Email: "name@mail.com", Password: "123", CreatedAt: createdAt}
 		err := user.Prepare("no register")
 
 		if err.Error() != "username must have three or more characters" {
@@ -121,7 +123,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 
 	t.Run("Should return an 'username is required' error if name is empty", func(t *testing.T) {
 		createdAt := time.Now()
-		user := User{Id: 1, Name: "", Nick: "nick", Email: "name@mail.com", Password: "123", CreatedAt: createdAt}
+		user := User{Id: USER_ID, Name: "", Nick: "nick", Email: "name@mail.com", Password: "123", CreatedAt: createdAt}
 		err := user.Prepare("no register")
 
 		if err.Error() != "username is required" {
@@ -131,7 +133,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 
 	t.Run("Should return an 'nick is required' error if nick is empty", func(t *testing.T) {
 		createdAt := time.Now()
-		user := User{Id: 1, Name: "Name", Nick: "", Email: "name@mail.com", Password: "123", CreatedAt: createdAt}
+		user := User{Id: USER_ID, Name: "Name", Nick: "", Email: "name@mail.com", Password: "123", CreatedAt: createdAt}
 		err := user.Prepare("no register")
 
 		if err.Error() != "nick is required" {
@@ -141,7 +143,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 
 	t.Run("Should return an 'email is required' error if email is empty", func(t *testing.T) {
 		createdAt := time.Now()
-		user := User{Id: 1, Name: "Name", Nick: "nick", Email: "", Password: "123", CreatedAt: createdAt}
+		user := User{Id: USER_ID, Name: "Name", Nick: "nick", Email: "", Password: "123", CreatedAt: createdAt}
 		err := user.Prepare("no register")
 
 		if err.Error() != "email is required" {
@@ -153,7 +155,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 		createdAt := time.Now()
 		users := []User{
 			{
-				Id:        1,
+				Id:        USER_ID,
 				Name:      "name",
 				Nick:      "nick",
 				Email:     "a",
@@ -161,7 +163,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 				CreatedAt: createdAt,
 			},
 			{
-				Id:        1,
+				Id:        USER_ID,
 				Name:      "name",
 				Nick:      "nick",
 				Email:     "a@",
@@ -169,7 +171,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 				CreatedAt: createdAt,
 			},
 			{
-				Id:        1,
+				Id:        USER_ID,
 				Name:      "name",
 				Nick:      "nick",
 				Email:     "@a",
@@ -177,7 +179,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 				CreatedAt: createdAt,
 			},
 			{
-				Id:        1,
+				Id:        USER_ID,
 				Name:      "name",
 				Nick:      "nick",
 				Email:     "abc",
@@ -197,7 +199,7 @@ func TestUserPrepareWithValidUser(t *testing.T) {
 
 	t.Run("Should return an error if password is empty on register step", func(t *testing.T) {
 		createdAt := time.Now()
-		user := User{Id: 1, Name: "Name", Nick: "nick", Email: "name@mail", Password: "", CreatedAt: createdAt}
+		user := User{Id: USER_ID, Name: "Name", Nick: "nick", Email: "name@mail", Password: "", CreatedAt: createdAt}
 		err := user.Prepare("register")
 
 		if err.Error() != "password is required" {

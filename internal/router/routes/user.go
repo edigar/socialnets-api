@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"github.com/edigar/socialnets-api/internal/controllers"
+	"github.com/edigar/socialnets-api/internal/controller"
 	"net/http"
 )
 
@@ -9,61 +9,61 @@ var userRoutes = []Route{
 	{
 		URI:                    "/api/user",
 		Method:                 http.MethodPost,
-		Function:               controllers.PostUser,
+		Function:               controller.PostUser,
 		AuthenticationRequired: false,
 	},
 	{
 		URI:                    "/api/user",
 		Method:                 http.MethodGet,
-		Function:               controllers.GetUsers,
+		Function:               controller.GetUsers,
 		AuthenticationRequired: true,
 	},
 	{
 		URI:                    "/api/user/{userId}",
 		Method:                 http.MethodGet,
-		Function:               controllers.GetUser,
+		Function:               controller.GetUser,
 		AuthenticationRequired: true,
 	},
 	{
 		URI:                    "/api/user/{userId}",
 		Method:                 http.MethodPut,
-		Function:               controllers.UpdateUser,
+		Function:               controller.UpdateUser,
 		AuthenticationRequired: true,
 	},
 	{
 		URI:                    "/api/user/{userId}",
 		Method:                 http.MethodDelete,
-		Function:               controllers.DeleteUser,
+		Function:               controller.DeleteUser,
 		AuthenticationRequired: true,
 	},
 	{
 		URI:                    "/api/user/{userId}/follow",
 		Method:                 http.MethodPost,
-		Function:               controllers.Follow,
+		Function:               controller.Follow,
 		AuthenticationRequired: true,
 	},
 	{
 		URI:                    "/api/user/{userId}/unfollow",
 		Method:                 http.MethodPost,
-		Function:               controllers.Unfollow,
+		Function:               controller.Unfollow,
 		AuthenticationRequired: true,
 	},
 	{
 		URI:                    "/api/user/{userId}/followers",
 		Method:                 http.MethodGet,
-		Function:               controllers.GetFollowers,
+		Function:               controller.GetFollowers,
 		AuthenticationRequired: true,
 	},
 	{
 		URI:                    "/api/user/{userId}/following",
 		Method:                 http.MethodGet,
-		Function:               controllers.GetFollowing,
+		Function:               controller.GetFollowing,
 		AuthenticationRequired: true,
 	},
 	{
 		URI:                    "/api/user/{userId}/update-password",
 		Method:                 http.MethodPost,
-		Function:               controllers.UpdatePassword,
+		Function:               controller.UpdatePassword,
 		AuthenticationRequired: true,
 	},
 }
