@@ -57,7 +57,7 @@ func (p *PostUseCase) Update(authorId string, postId uint64, post entity.Post) e
 	if err != nil {
 		return err
 	}
-	if postDb.AuthorId == authorId {
+	if postDb.AuthorId != authorId {
 		return ErrAccessDenied
 	}
 

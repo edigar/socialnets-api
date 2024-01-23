@@ -9,7 +9,7 @@ import (
 
 type User interface {
 	Create(user entity.User) (string, error)
-	FetchBy(nameOrNick string) ([]entity.User, error)
+	FetchByNameOrNick(nameOrNick string) ([]entity.User, error)
 	FetchById(userId string) (entity.User, error)
 	FetchByEmail(email string) (entity.User, error)
 	Update(userId string, user entity.User) error
@@ -41,7 +41,7 @@ func (r UserRepository) Create(user entity.User) (string, error) {
 	return userId, nil
 }
 
-func (r UserRepository) FetchBy(nameOrNick string) ([]entity.User, error) {
+func (r UserRepository) FetchByNameOrNick(nameOrNick string) ([]entity.User, error) {
 	nameOrNick = fmt.Sprintf("%%%s%%", nameOrNick)
 	rows, err := r.db.Query(
 		"SELECT id, name, nick, email, password, created_at, updated_at FROM users WHERE name LIKE $1 OR nick LIKE $1",

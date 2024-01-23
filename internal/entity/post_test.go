@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const AUTHOR_ID = "$2a$10$6u7eR7kXjapXbv2HvJ3VBeKtwEsMU90aetwW0P3X7.Se.BgOJWL4C"
+const AUTHOR_ID = "eedf21bf-dde8-4c85-b50b-89a1cba87c2e"
 
 type PostScenarios struct {
 	post     Post
