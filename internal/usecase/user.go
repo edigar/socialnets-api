@@ -60,7 +60,7 @@ func (u *UserUseCase) GetById(id string) (entity.User, error) {
 }
 
 func (u *UserUseCase) GetByNameOrNick(nameOrNick string) ([]entity.User, error) {
-	user, err := u.userRepository.FetchBy(nameOrNick)
+	user, err := u.userRepository.FetchByNameOrNick(nameOrNick)
 	if err != nil {
 		return nil, err
 	}

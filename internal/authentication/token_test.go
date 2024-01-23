@@ -8,7 +8,7 @@ import (
 )
 
 func TestCreateToken(t *testing.T) {
-	userId := "$2a$10$6u7eR7kXjapXbv2HvJ3VBeKtwEsMU90aetwW0P3X7.Se.BgOJWL4C"
+	userId := "eedf21bf-dde8-4c85-b50b-89a1cba87c2e"
 	token, err := CreateToken(userId)
 	if err != nil {
 		t.Errorf("CreateToken should not return an error for a valid uint64: %v", err)
@@ -42,7 +42,7 @@ func TestCreateToken(t *testing.T) {
 }
 
 func TestTokenValidateValidToken(t *testing.T) {
-	userId := "$2a$10$6u7eR7kXjapXbv2HvJ3VBeKtwEsMU90aetwW0P3X7.Se.BgOJWL4C"
+	userId := "eedf21bf-dde8-4c85-b50b-89a1cba87c2e"
 	token, err := CreateToken(userId)
 	if err != nil {
 		t.Errorf("CreateToken should not return an error for a valid uint64: %v", err)
@@ -71,7 +71,7 @@ func TestTokenValidateInvalidToken(t *testing.T) {
 }
 
 func TestExtractUserIdValidToken(t *testing.T) {
-	userId := "$2a$10$6u7eR7kXjapXbv2HvJ3VBeKtwEsMU90aetwW0P3X7.Se.BgOJWL4C"
+	userId := "eedf21bf-dde8-4c85-b50b-89a1cba87c2e"
 	token, err := CreateToken(userId)
 	if err != nil {
 		t.Errorf("CreateToken should not return an error")
