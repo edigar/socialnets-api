@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	config.Load()
+	onfig.Load()
 	r := router.Generate()
 
 	server := &http.Server{Addr: fmt.Sprintf(":%d", config.Port), Handler: r}
