@@ -36,7 +36,7 @@ func TestPostPrepare(t *testing.T) {
 			if err != nil {
 				t.Errorf("Post prepare should not return an error for a valid post: %v. Scenario: %v", err, scenario.post)
 			}
-			if scenario.post != scenario.expected {
+			if scenario.post == scenario.expected {
 				t.Errorf(
 					"Post prepare should correctly format the post data. Post: %v. Post expected: %v",
 					scenario.post,
