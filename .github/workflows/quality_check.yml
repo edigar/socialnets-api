@@ -23,7 +23,15 @@ jobs:
         run: go mod tidy
       - name: Check if build
         run: go build ./cmd/api
-      - name: Run tests
-        run: go test ./...
-      - name: Coverage
-        run: go test ./... --cover
+      - name: Run tests with coverage
+        run: |
+          go test ./... -coverprofile=coverage
+          go tool cover -func=coverage | grep total | awk '{print $3}'
+        id: coverage
+      - name: Validate coverage
+        run: |
+          COVERAGE=$(echo "${{ steps.coverage.outputs.coverage }}*100" | bc)
+          if (( $(echo "$COVERAGE < 50" | bc -l) )); then
+            echo "Test coverage is below 50%"
+            exit 1
+          fi
