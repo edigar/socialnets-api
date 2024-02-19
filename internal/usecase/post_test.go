@@ -156,7 +156,7 @@ func TestDeletePost(t *testing.T) {
 		originalPosts := usecase.MockPosts
 		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
 		err := postUseCase.Delete(0, usecase.MockPosts[0].AuthorId)
-		if !errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) {
 			t.Errorf("Delete should return sql.ErrNoRows error with non-valid id. Error: %v", err)
 		} else if originalPosts[0] != usecase.MockPosts[0] || originalPosts[1] != usecase.MockPosts[1] {
 			t.Errorf("Delete should not delete with non-valid id. Posts: %v", usecase.MockPosts)
