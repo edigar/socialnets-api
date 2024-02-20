@@ -4,6 +4,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    outputs:
+      coverage: ${{ steps.coverage.outputs.percentage }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Go
@@ -26,8 +28,7 @@ jobs:
       - name: Run tests with coverage
         run: |
           go test ./... -coverprofile=coverage
-          percentage=$(go tool cover -func=coverage | grep total | awk '{print $3}')
-          echo "Percentage=$percentage" >> $GITHUB_ENV
+          go tool cover -func=coverage | grep total | awk 'percentage={print $3}' >> $GITHUB_OUTPUT ';'
         id: coverage
       - name: Validate coverage
         run: |
