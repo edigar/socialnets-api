@@ -26,13 +26,13 @@ jobs:
       - name: Run tests with coverage
         run: |
           go test ./... -coverprofile=coverage
-          go tool cover -func=coverage | grep total | awk '{print $3}'
+          percentage=echo go tool cover -func=coverage | grep total | awk '{print $3}' >> $GITHUB_OUTPUT
         id: coverage
       - name: Validate coverage
         run: |
           echo "Coverage output:"
-          echo "${{ steps.coverage.stdout }}"
-          COVERAGE=$(echo "${{ steps.coverage.stdout }}" | awk '{print $3}')
+          echo "${{ steps.coverage.outputs.percentage }}"
+          COVERAGE=$(echo "${{ steps.coverage.outputs.percentage }}" | awk '{print $3}')
           echo "Coverage value:"
           echo "$COVERAGE"
           if (( $(echo "$COVERAGE < 50" | bc -l) )); then
