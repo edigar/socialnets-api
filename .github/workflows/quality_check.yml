@@ -4,8 +4,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    outputs:
-      coverage: ${{ steps.coverage.outputs.percentage }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Go
@@ -26,14 +24,12 @@ jobs:
       - name: Check if build
         run: go build ./cmd/api
       - name: Run tests with coverage
+        id: coverage
         run: |
           go test ./... -coverprofile=coverage
           echo "percentage=$(go tool cover -func=coverage | grep total | awk '{print $3}')" >> $GITHUB_OUTPUT
-        id: coverage
       - name: Validate coverage
         run: |
-          echo "Coverage output:"
-          echo "${{ steps.coverage.outputs.percentage }}"
           if [[ ${{ steps.coverage.outputs.percentage }} < 50 ]]; then
             echo "Test coverage is below 50%"
             exit 1
