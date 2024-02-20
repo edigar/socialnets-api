@@ -28,7 +28,7 @@ jobs:
       - name: Run tests with coverage
         run: |
           go test ./... -coverprofile=coverage
-          echo "percentage=$(go tool cover -func=coverage | grep total | awk {print $3})" >> $GITHUB_OUTPUT
+          echo "percentage=$(go tool cover -func=coverage | grep total | awk '{print $3}')" >> $GITHUB_OUTPUT
         id: coverage
       - name: Validate coverage
         run: |
