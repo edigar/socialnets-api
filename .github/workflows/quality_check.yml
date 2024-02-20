@@ -34,10 +34,7 @@ jobs:
         run: |
           echo "Coverage output:"
           echo "${{ steps.coverage.outputs.percentage }}"
-          COVERAGE=$(echo "${{ steps.coverage.outputs.percentage }}" | awk '{print $3}')
-          echo "Coverage value:"
-          echo "$COVERAGE"
-          if (( $(echo "$COVERAGE < 50" | bc -l) )); then
+          if [[ ${{ steps.coverage.outputs.percentage }} < 50 | bc -l ]]; then
             echo "Test coverage is below 50%"
             exit 1
           fi
