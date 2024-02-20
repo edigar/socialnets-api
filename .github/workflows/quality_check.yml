@@ -30,7 +30,11 @@ jobs:
         id: coverage
       - name: Validate coverage
         run: |
+          echo "Coverage output:"
+          echo "${{ steps.coverage.stdout }}"
           COVERAGE=$(echo "${{ steps.coverage.stdout }}" | awk '{print $3}')
+          echo "Coverage value:"
+          echo "$COVERAGE"
           if (( $(echo "$COVERAGE < 50" | bc -l) )); then
             echo "Test coverage is below 50%"
             exit 1
