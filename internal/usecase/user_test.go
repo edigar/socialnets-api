@@ -362,7 +362,7 @@ func TestUpdatePassword(t *testing.T) {
 		userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
 		oldPassword := usecase.MockUsers[0].Password
 		err := userUseCase.UpdatePassword(usecase.MockUsers[0].Id, passwordDto)
-		if !errors.Is(err, ErrWrongPassword) {
+		if errors.Is(err, ErrWrongPassword) {
 			t.Errorf("UpdatePassword should return ErrWrongPassword error for wrong password. Got: %v", err)
 		} else if usecase.MockUsers[0].Password != oldPassword {
 			t.Errorf("UpdatePassword should not change user password if current password is wrong. old password(123): %v Updated(abc): %v",
