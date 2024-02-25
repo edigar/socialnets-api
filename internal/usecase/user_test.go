@@ -343,7 +343,7 @@ func TestUnfollow(t *testing.T) {
 
 func TestUpdatePassword(t *testing.T) {
 	t.Run("Should update user password", func(t *testing.T) {
-		passwordDto := dto.Password{"abc", "123"}
+		passwordDto := dto.Password{New: "abc", Current: "123"}
 		userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
 		oldPassword := usecase.MockUsers[0].Password
 		err := userUseCase.UpdatePassword(usecase.MockUsers[0].Id, passwordDto)
@@ -358,7 +358,7 @@ func TestUpdatePassword(t *testing.T) {
 	})
 
 	t.Run("Should not update user password if current password is wrong", func(t *testing.T) {
-		passwordDto := dto.Password{"abc", "wrong-password"}
+		passwordDto := dto.Password{New: "abc", Current: "wrong-password"}
 		userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
 		oldPassword := usecase.MockUsers[0].Password
 		err := userUseCase.UpdatePassword(usecase.MockUsers[0].Id, passwordDto)
