@@ -6,6 +6,7 @@ import (
 	"github.com/edigar/socialnets-api/internal/entity"
 	"github.com/edigar/socialnets-api/internal/error_type"
 	"github.com/edigar/socialnets-api/internal/usecase/mock"
+	"reflect"
 	"testing"
 )
 
@@ -51,6 +52,62 @@ func TestCreatePost(t *testing.T) {
 			} else if scenario.Id != 0 {
 				t.Errorf("CreatePost should set 0 on post id for non-valid post data. Got: %v.", scenario.Id)
 			}
+		}
+	})
+}
+
+func TestGetByUser(t *testing.T) {
+	t.Run("Should get all posts of user", func(t *testing.T) {
+		userId := usecase.MockPosts[1].AuthorId
+		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
+		posts, err := postUseCase.GetByUser(userId)
+		if err != nil {
+			t.Errorf("GetByUser should not return an error for a valid user id. User: %v. Error: %v", userId, err)
+		}
+
+		if !reflect.DeepEqual(posts, usecase.MockPosts) {
+			t.Errorf("GetByUser should return posts for user. Expected: %v. Got: %v", posts, usecase.MockPosts)
+		}
+	})
+
+	t.Run("Should get a bad connection database error", func(t *testing.T) {
+		userId := usecase.ERROR
+		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
+		posts, err := postUseCase.GetByUser(userId)
+		if err.Error() != "driver: bad connection" {
+			t.Errorf("GetByUser should get a bad connection error. Expected: %v. Got: %v", "driver: bad connection", err)
+		}
+
+		if posts != nil {
+			t.Errorf("GetByUser should not get any post if connection get an error. Posts: %v.", posts)
+		}
+	})
+}
+
+func TestGetById(t *testing.T) {
+	t.Run("Should get a post by id", func(t *testing.T) {
+		postId := usecase.MockPosts[0].Id
+		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
+		post, err := postUseCase.GetById(postId)
+		if err != nil {
+			t.Errorf("GetById should not return an error for a valid id. Post id: %v. Error: %v", postId, err)
+		}
+
+		if post != usecase.MockPosts[0] {
+			t.Errorf("GetByUser should return post by id. Expected: %v. Got: %v", usecase.MockPosts[0].Id, post)
+		}
+	})
+
+	t.Run("Should get empty Post if id is invalid", func(t *testing.T) {
+		postId := uint64(99)
+		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
+		post, err := postUseCase.GetById(postId)
+		if err != nil {
+			t.Errorf("GetById should not return an error for a non-valid id. Post id: %v. Error: %v", postId, err)
+		}
+
+		if post != (entity.Post{}) {
+			t.Errorf("GetByUser should return empty post for a non-valid id. Expected: %v. Got: %v", entity.Post{}, post)
 		}
 	})
 }
@@ -137,7 +194,120 @@ func TestUpdatePost(t *testing.T) {
 	})
 }
 
+func TestGetUserPosts(t *testing.T) {
+	t.Run("Should get user posts by id", func(t *testing.T) {
+		userId := usecase.MockPosts[1].AuthorId
+		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
+		posts, err := postUseCase.GetUserPosts(userId)
+		if err != nil {
+			t.Errorf("GetByUser should not return an error for a valid user id. User: %v. Error: %v", userId, err)
+		}
+
+		if len(posts) != 2 {
+			t.Errorf("GetByUser should return all posts of user. User: %v. Posts: %v", userId, posts)
+		}
+
+		for _, post := range posts {
+			if post != usecase.MockPosts[1] && post != usecase.MockPosts[2] {
+				t.Errorf("GetByUser should return only posts of user. Post: %v. Posts: %v", post, posts)
+			}
+		}
+	})
+
+	t.Run("Should get a bad connection database error", func(t *testing.T) {
+		userId := usecase.ERROR
+		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
+		posts, err := postUseCase.GetUserPosts(userId)
+		if err.Error() != "driver: bad connection" {
+			t.Errorf("GetByUser should get a bad connection error. Expected: %v. Got: %v", "driver: bad connection", err)
+		}
+
+		if posts != nil {
+			t.Errorf("GetByUser should not get any post if connection get an error. Posts: %v.", posts)
+		}
+	})
+}
+
+func TestLikePost(t *testing.T) {
+	t.Run("Should like a post", func(t *testing.T) {
+		postId := usecase.MockPosts[0].Id
+		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
+		err := postUseCase.LikePost(postId)
+		if err != nil {
+			t.Errorf("LikePost should not return error for a valid post. Error: %v", err)
+		}
+
+		if usecase.MockPosts[0].Likes != 1 {
+			t.Errorf("LikePost should increase like to 1. Got: %v", usecase.MockPosts[0].Likes)
+		}
+
+		usecase.MockPosts[0].Likes = 0
+	})
+
+	t.Run("Should not like a post with non-valid id", func(t *testing.T) {
+		postId := uint64(99)
+		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
+		err := postUseCase.LikePost(postId)
+		if !errors.Is(err, sql.ErrNoRows) {
+			t.Errorf("LikePost should return sql.ErrNoRows error with non-valid id. Error: %v", err)
+		}
+	})
+}
+
+func TestUnLikePost(t *testing.T) {
+	t.Run("Should unlike a post", func(t *testing.T) {
+		usecase.MockPosts[0].Likes = 2
+		postId := usecase.MockPosts[0].Id
+		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
+		err := postUseCase.UnLikePost(postId)
+		if err != nil {
+			t.Errorf("UnLikePost should not return error for a valid post. Error: %v", err)
+		}
+
+		if usecase.MockPosts[0].Likes != 1 {
+			t.Errorf("LikePost should decrease like to 1. Got: %v", usecase.MockPosts[0].Likes)
+		}
+
+		usecase.MockPosts[0].Likes = 0
+	})
+
+	t.Run("Should not unlike a post with non-valid id", func(t *testing.T) {
+		postId := uint64(99)
+		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
+		err := postUseCase.UnLikePost(postId)
+		if !errors.Is(err, sql.ErrNoRows) {
+			t.Errorf("UnLikePost should return sql.ErrNoRows error with non-valid id. Error: %v", err)
+		}
+	})
+}
+
 func TestDeletePost(t *testing.T) {
+	t.Run("Should delete post by id", func(t *testing.T) {
+		originalPosts := usecase.MockPosts
+		postId := usecase.MockPosts[0].Id
+		expectedPosts := []entity.Post{usecase.MockPosts[1], usecase.MockPosts[2]}
+		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
+		err := postUseCase.Delete(postId, usecase.MockPosts[0].AuthorId)
+		if err != nil {
+			t.Errorf("Delete should not return an error for a valid post id and author id. Post: %v. Error: %v", usecase.MockPosts[0], err)
+		}
+		if !reflect.DeepEqual(expectedPosts, usecase.MockPosts) {
+			t.Errorf("Delete should remove post with id %v. Expected: %v. Got: %v", postId, expectedPosts, usecase.MockPosts)
+		}
+
+		usecase.MockPosts = originalPosts
+	})
+
+	t.Run("Should return an error if post id doesn't exist", func(t *testing.T) {
+		var postId uint64
+		postId = 999
+		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
+		err := postUseCase.Delete(postId, usecase.MockPosts[0].AuthorId)
+		if !errors.Is(err, sql.ErrNoRows) {
+			t.Errorf("Delete should return an error for invalid post id. Expected: %v. Got: %v", sql.ErrNoRows, err)
+		}
+	})
+
 	t.Run("Should not delete post with non-valid author id", func(t *testing.T) {
 		originalPosts := usecase.MockPosts
 		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
