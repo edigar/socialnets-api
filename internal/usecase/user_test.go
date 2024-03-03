@@ -137,15 +137,6 @@ func TestRegister(t *testing.T) {
 			}
 		}
 	})
-
-	//t.Run("Should get an DB error", func(t *testing.T) {
-	//	user := entity.User{Name: "Test", Nick: "test", Email: "test@test"}
-	//	userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
-	//	err := userUseCase.Update(usecase.USER_ERROR, user)
-	//	if err.Error() != "driver: bad connection" {
-	//		t.Errorf("Update should get a bad connection error. Expected: %v. Got: %v", "driver: bad connection", err)
-	//	}
-	//})
 }
 
 func TestGetUserById(t *testing.T) {
