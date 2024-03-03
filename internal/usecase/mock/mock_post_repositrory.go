@@ -13,7 +13,7 @@ func NewMockPostRepository() *MockPostRepository {
 }
 
 const NEW_POST_ID = 4
-const ERROR = "ERROR"
+const POST_ERROR = "ERROR"
 
 var MockPosts = []entity.Post{
 	{
@@ -54,7 +54,7 @@ func (mr MockPostRepository) FetchById(postId uint64) (entity.Post, error) {
 }
 
 func (mr MockPostRepository) FetchByUser(userId string) ([]entity.Post, error) {
-	if userId == ERROR {
+	if userId == POST_ERROR {
 		return nil, errors.New("driver: bad connection")
 	}
 
@@ -89,7 +89,7 @@ func (r MockPostRepository) Delete(postId uint64) error {
 }
 
 func (mr MockPostRepository) FetchUserPosts(userId string) ([]entity.Post, error) {
-	if userId == ERROR {
+	if userId == POST_ERROR {
 		return nil, errors.New("driver: bad connection")
 	}
 

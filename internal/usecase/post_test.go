@@ -71,7 +71,7 @@ func TestGetByUser(t *testing.T) {
 	})
 
 	t.Run("Should get a bad connection database error", func(t *testing.T) {
-		userId := usecase.ERROR
+		userId := usecase.POST_ERROR
 		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
 		posts, err := postUseCase.GetByUser(userId)
 		if err.Error() != "driver: bad connection" {
@@ -215,7 +215,7 @@ func TestGetUserPosts(t *testing.T) {
 	})
 
 	t.Run("Should get a bad connection database error", func(t *testing.T) {
-		userId := usecase.ERROR
+		userId := usecase.POST_ERROR
 		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
 		posts, err := postUseCase.GetUserPosts(userId)
 		if err.Error() != "driver: bad connection" {
