@@ -8,6 +8,7 @@ import (
 	errorType "github.com/edigar/socialnets-api/internal/error_type"
 	"github.com/edigar/socialnets-api/internal/usecase/mock"
 	"golang.org/x/crypto/bcrypt"
+	"reflect"
 	"testing"
 )
 
@@ -243,6 +244,18 @@ func TestGetUserByNameOrNick(t *testing.T) {
 			t.Errorf("GetByNameOrNick should return empty list if no find user. Got %v.", users)
 		}
 	})
+
+	t.Run("Should get an DB error", func(t *testing.T) {
+		userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
+		users, err := userUseCase.GetByNameOrNick(usecase.USER_ERROR)
+		if err.Error() != "driver: bad connection" {
+			t.Errorf("GetByNameOrNick should get a bad connection error. Expected: %v. Got: %v", "driver: bad connection", err)
+		}
+
+		if users != nil {
+			t.Errorf("GetByNameOrNick should not get any user if connection get an error. users: %v.", users)
+		}
+	})
 }
 
 func TestUpdateUser(t *testing.T) {
@@ -319,6 +332,15 @@ func TestUpdateUser(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("Should get an DB error", func(t *testing.T) {
+		user := entity.User{Name: "Test", Nick: "test", Email: "test@test"}
+		userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
+		err := userUseCase.Update(usecase.USER_ERROR, user)
+		if err.Error() != "driver: bad connection" {
+			t.Errorf("Update should get a bad connection error. Expected: %v. Got: %v", "driver: bad connection", err)
+		}
+	})
 }
 
 func TestFollow(t *testing.T) {
@@ -329,6 +351,14 @@ func TestFollow(t *testing.T) {
 			t.Errorf("Follow should return ErrOperationDenied if user id is equal to follower id. Got %v.", err)
 		}
 	})
+
+	t.Run("Should return bad connection error DB", func(t *testing.T) {
+		userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
+		err := userUseCase.Follow(usecase.MockUsers[0].Id, usecase.MockUsers[1].Id)
+		if err.Error() != "driver: bad connection" {
+			t.Errorf("Folow should get a bad connection error. Expected: %v. Got: %v", "driver: bad connection", err)
+		}
+	})
 }
 
 func TestUnfollow(t *testing.T) {
@@ -337,6 +367,14 @@ func TestUnfollow(t *testing.T) {
 		err := userUseCase.Unfollow(usecase.MockUsers[0].Id, usecase.MockUsers[0].Id)
 		if !errors.Is(err, ErrOperationDenied) {
 			t.Errorf("Unfollow should return ErrOperationDenied if user id is equal to follower id. Got %v.", err)
+		}
+	})
+
+	t.Run("Should return bad connection error DB", func(t *testing.T) {
+		userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
+		err := userUseCase.Unfollow(usecase.MockUsers[0].Id, usecase.MockUsers[1].Id)
+		if err.Error() != "driver: bad connection" {
+			t.Errorf("Folow should get a bad connection error. Expected: %v. Got: %v", "driver: bad connection", err)
 		}
 	})
 }
@@ -369,6 +407,90 @@ func TestUpdatePassword(t *testing.T) {
 				oldPassword,
 				usecase.MockUsers[0].Password,
 			)
+		}
+	})
+
+	t.Run("Should get error if userId doesn't exist", func(t *testing.T) {
+		passwordDto := dto.Password{New: "abc", Current: "123"}
+		userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
+		err := userUseCase.UpdatePassword("wrong-id", passwordDto)
+		if !errors.Is(err, sql.ErrNoRows) {
+			t.Errorf("UpdatePassword should return ErrNoRows error for an Nonexistent id. Got: %v. Error expected: %v",
+				err,
+				sql.ErrNoRows,
+			)
+		}
+	})
+}
+
+func TestGetFollowers(t *testing.T) {
+	t.Run("Should get user followers", func(t *testing.T) {
+		userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
+		followers, err := userUseCase.GetFollowers(usecase.MockUsers[0].Id)
+		if err != nil {
+			t.Errorf("GetFollowers should not return an error for a valid user id. Error: %v", err)
+		}
+
+		expectedFollowers := []entity.User{usecase.MockUsers[1], usecase.MockUsers[2]}
+		if !reflect.DeepEqual(followers, expectedFollowers) {
+			t.Errorf("GetFollowers should return user followers. Expected: %v. Got: %v", expectedFollowers, followers)
+		}
+	})
+
+	t.Run("Should get an DB error", func(t *testing.T) {
+		userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
+		followers, err := userUseCase.GetFollowers(usecase.USER_ERROR)
+		if err.Error() != "driver: bad connection" {
+			t.Errorf("GetFollowers should get a bad connection error. Expected: %v. Got: %v", "driver: bad connection", err)
+		}
+
+		if followers != nil {
+			t.Errorf("GetFollowers should not get any follower if connection get an error. Posts: %v.", followers)
+		}
+	})
+}
+
+func TestGetFollowing(t *testing.T) {
+	t.Run("Should get user following", func(t *testing.T) {
+		userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
+		following, err := userUseCase.GetFollowing(usecase.MockUsers[0].Id)
+		if err != nil {
+			t.Errorf("GetFollowing should not return an error for a valid user id. Error: %v", err)
+		}
+
+		expectedFollowing := []entity.User{usecase.MockUsers[1], usecase.MockUsers[2]}
+		if !reflect.DeepEqual(following, expectedFollowing) {
+			t.Errorf("GetFollowing should return user followers. Expected: %v. Got: %v", expectedFollowing, following)
+		}
+	})
+
+	t.Run("Should get an DB error", func(t *testing.T) {
+		userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
+		following, err := userUseCase.GetFollowing(usecase.USER_ERROR)
+		if err.Error() != "driver: bad connection" {
+			t.Errorf("GetFollowing should get a bad connection error. Expected: %v. Got: %v", "driver: bad connection", err)
+		}
+
+		if following != nil {
+			t.Errorf("GetFollowing should not get any following if connection get an error. Posts: %v.", following)
+		}
+	})
+}
+
+func TestDelete(t *testing.T) {
+	t.Run("Should get nil if delete an user", func(t *testing.T) {
+		userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
+		err := userUseCase.Delete(usecase.MockUsers[2].Id)
+		if err != nil {
+			t.Errorf("Delete should not return an error if delete user. Error: %v", err)
+		}
+	})
+
+	t.Run("Should get an DB error", func(t *testing.T) {
+		userUseCase := NewUserUseCase(usecase.NewMockUserRepository())
+		err := userUseCase.Delete(usecase.USER_ERROR)
+		if err.Error() != "driver: bad connection" {
+			t.Errorf("Delete should get a bad connection error. Expected: %v. Got: %v", "driver: bad connection", err)
 		}
 	})
 }
