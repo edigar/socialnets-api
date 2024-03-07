@@ -34,7 +34,7 @@ jobs:
           echo "percentage=$(go tool cover -func=coverage | grep total | awk '{print $3}')" >> $GITHUB_OUTPUT
       - name: Validate coverage
         run: |
-          if [[ ${{ steps.coverage.outputs.percentage }} < 50 ]]; then
-            echo "Test coverage is below 50%"
+          if [[ ${{ steps.coverage.outputs.percentage }} < 70 ]]; then
+            echo "Test coverage is below 70%"
             exit 1
           fi
