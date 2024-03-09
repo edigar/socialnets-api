@@ -26,7 +26,12 @@ jobs:
       - name: Go vet
         run: go vet ./...
       - name: Go fmt
-        run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
+        run: |
+          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+            gofmt -s -l .
+            echo "Please format Go code by running: go fmt ./..."
+            exit 1 
+          fi
       - name: Run tests with coverage
         id: coverage
         run: |
