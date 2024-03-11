@@ -92,14 +92,14 @@ go install github.com/pressly/goose/v3/cmd/goose@latest
 
 Change variables and run:
 ```bash
-goose -dir build/migrations postgres "postgresql://goose:{DB_PASSWORD}@{DB_HOST}:5432/{DATABASE_NAME}?sslmode=disable" up
+goose -dir build/migrations postgres "postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DATABASE_NAME}?sslmode=disable" up
 ```
 
 For convenience, you can set the database driver and connection string as environment variables:
 
 ```bash
 export GOOSE_DRIVER=postgres
-export GOOSE_DBSTRING=postgresql://goose:your_password@db_host:5432/socialnets?sslmode=disable
+export GOOSE_DBSTRING=postgresql://db_user:your_password@db_host:5432/socialnets?sslmode=disable
 ```
 
 And then, you can run the migration using a short command:
