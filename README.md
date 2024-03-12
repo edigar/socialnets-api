@@ -82,6 +82,32 @@ go build ./cmd/api
 
 You'll have API running on http://localhost:8000 (if you don't change `API_PORT` on `.env`).
 
+## Migrations
+
+This project uses [pressly/goose](https://github.com/pressly/goose) to manage migrations, which are located in the build/migrations folder. To execute them, install Goose:
+
+```bash
+go install github.com/pressly/goose/v3/cmd/goose@latest
+```
+
+Change variables and run:
+```bash
+goose -dir build/migrations postgres "postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DATABASE_NAME}?sslmode=disable" up
+```
+
+For convenience, you can set the database driver and connection string as environment variables:
+
+```bash
+export GOOSE_DRIVER=postgres
+export GOOSE_DBSTRING=postgresql://db_user:your_password@db_host:5432/socialnets?sslmode=disable
+```
+
+And then, you can run the migration using a short command:
+
+```bash
+goose -dir build/migrations up
+```
+
 ## Usage
 
 After starting application, you'll have access to following routes:
@@ -138,14 +164,14 @@ Soon a [swagger](https://swagger.io/docs/specification/2-0/what-is-swagger/) doc
 
 ## TODO
 
-- [ ] Add [GORM](https://gorm.io) to the project
+- [ ] ~~Add [GORM](https://gorm.io) to the project~~
 - [ ] Improve tests
 - [ ] Add [Swagger](https://swagger.io) documentation
 - [x] Implements UUID for user's Id
 - [ ] Register who liked a post, so that each user can only like each post once, in addition to having information on who liked each post. 
     + [ ] Add likes table
     + [ ] Control who like or unlike a post.
-- [ ] Implements migrations
+- [x] Implements migrations
 - [ ] Password recovery
 
 ## License
