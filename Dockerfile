@@ -1,4 +1,4 @@
-FROM golang:1.21.1 AS build
+FROM golang:1.25 AS build
 LABEL maintainer='Edigar Herculano <edigarhdev@gmail.com>'
 
 WORKDIR /app

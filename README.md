@@ -5,7 +5,7 @@ A social network API with the functionalities (so far) of user registration, fol
 ## Requirements
 
 - [PostgreSQL](https://www.postgresql.org/) 16.0
-- [Golang](https://go.dev/) 1.21.1
+- [Golang](https://go.dev/) 1.25.0
 
 If you use [docker](https://www.docker.com/), here you will find a complete environment container.
 
