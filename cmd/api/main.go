@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/edigar/socialnets-api/internal/config"
+	"github.com/edigar/socialnets-api/internal/database"
 	"github.com/edigar/socialnets-api/internal/router"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,7 +17,14 @@ import (
 
 func main() {
 	config.Load()
-	r := router.Generate()
+
+	db, err := database.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	r := router.Generate(db)
 
 	server := &http.Server{Addr: fmt.Sprintf(":%d", config.Port), Handler: r}
 	fmt.Printf("SocialNets API is running on port %d...\n", config.Port)

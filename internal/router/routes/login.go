@@ -5,9 +5,11 @@ import (
 	"net/http"
 )
 
-var loginRoute = Route{
-	URI:                    "/api/login",
-	Method:                 http.MethodPost,
-	Function:               controller.Login,
-	AuthenticationRequired: false,
+func loginRoute(c *controller.UserController) Route {
+	return Route{
+		URI:                    "/api/login",
+		Method:                 http.MethodPost,
+		Function:               c.Login,
+		AuthenticationRequired: false,
+	}
 }
