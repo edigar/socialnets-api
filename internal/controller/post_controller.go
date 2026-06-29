@@ -5,10 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/edigar/socialnets-api/internal/authentication"
-	"github.com/edigar/socialnets-api/internal/database"
 	"github.com/edigar/socialnets-api/internal/entity"
 	"github.com/edigar/socialnets-api/internal/error_type"
-	"github.com/edigar/socialnets-api/internal/repository"
 	"github.com/edigar/socialnets-api/internal/response"
 	"github.com/edigar/socialnets-api/internal/usecase"
 	"github.com/gorilla/mux"
@@ -17,7 +15,7 @@ import (
 	"strconv"
 )
 
-func PostPost(w http.ResponseWriter, r *http.Request) {
+func (c *PostController) PostPost(w http.ResponseWriter, r *http.Request) {
 	userId, err := authentication.ExtractUserId(r)
 	if err != nil {
 		response.Error(w, http.StatusUnauthorized, err)
@@ -36,15 +34,7 @@ func PostPost(w http.ResponseWriter, r *http.Request) {
 
 	post.AuthorId = userId
 
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
-
-	postUseCase := usecase.NewPostUseCase(repository.NewPostRepository(db))
-	if err = postUseCase.CreatePost(&post); err != nil {
+	if err = c.postUseCase.CreatePost(&post); err != nil {
 		var epv *errorType.ErrorPostValidation
 		if errors.As(err, &epv) {
 			response.Error(w, http.StatusBadRequest, epv.Err)
@@ -58,21 +48,14 @@ func PostPost(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusCreated, post)
 }
 
-func GetPosts(w http.ResponseWriter, r *http.Request) {
+func (c *PostController) GetPosts(w http.ResponseWriter, r *http.Request) {
 	userId, err := authentication.ExtractUserId(r)
 	if err != nil {
 		response.Error(w, http.StatusUnauthorized, err)
 		return
 	}
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
 
-	postUseCase := usecase.NewPostUseCase(repository.NewPostRepository(db))
-	posts, err := postUseCase.GetByUser(userId)
+	posts, err := c.postUseCase.GetByUser(userId)
 	if err != nil {
 		response.Error(w, http.StatusInternalServerError, err)
 		return
@@ -81,22 +64,15 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, posts)
 }
 
-func GetPost(w http.ResponseWriter, r *http.Request) {
+func (c *PostController) GetPost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	postId, err := strconv.ParseUint(params["postId"], 10, 64)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, err)
 		return
 	}
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
 
-	postUseCase := usecase.NewPostUseCase(repository.NewPostRepository(db))
-	post, err := postUseCase.GetById(postId)
+	post, err := c.postUseCase.GetById(postId)
 	if err != nil {
 		response.Error(w, http.StatusInternalServerError, err)
 		return
@@ -105,7 +81,7 @@ func GetPost(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, post)
 }
 
-func UpdatePost(w http.ResponseWriter, r *http.Request) {
+func (c *PostController) UpdatePost(w http.ResponseWriter, r *http.Request) {
 	userId, err := authentication.ExtractUserId(r)
 	if err != nil {
 		response.Error(w, http.StatusUnauthorized, err)
@@ -128,15 +104,8 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 		response.Error(w, http.StatusBadRequest, err)
 		return
 	}
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
 
-	postUseCase := usecase.NewPostUseCase(repository.NewPostRepository(db))
-	if err = postUseCase.Update(userId, postId, post); err != nil {
+	if err = c.postUseCase.Update(userId, postId, post); err != nil {
 		var epv *errorType.ErrorPostValidation
 		if errors.As(err, &epv) {
 			response.Error(w, http.StatusBadRequest, epv.Err)
@@ -154,7 +123,7 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusNoContent, nil)
 }
 
-func DeletePost(w http.ResponseWriter, r *http.Request) {
+func (c *PostController) DeletePost(w http.ResponseWriter, r *http.Request) {
 	userId, err := authentication.ExtractUserId(r)
 	if err != nil {
 		response.Error(w, http.StatusUnauthorized, err)
@@ -166,15 +135,8 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 		response.Error(w, http.StatusBadRequest, err)
 		return
 	}
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
 
-	postUseCase := usecase.NewPostUseCase(repository.NewPostRepository(db))
-	if err = postUseCase.Delete(postId, userId); err != nil {
+	if err = c.postUseCase.Delete(postId, userId); err != nil {
 		if errors.Is(err, usecase.ErrAccessDenied) {
 			response.Error(w, http.StatusForbidden, err)
 			return
@@ -187,27 +149,20 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusNoContent, nil)
 }
 
-func GetUserPosts(w http.ResponseWriter, r *http.Request) {
+func (c *PostController) GetUserPosts(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userId := fmt.Sprintf("%s", params["userId"])
 
-	db, err := database.Connect()
+	posts, err := c.postUseCase.GetUserPosts(userId)
 	if err != nil {
 		response.Error(w, http.StatusInternalServerError, err)
 		return
-	}
-	defer db.Close()
-
-	postUseCase := usecase.NewPostUseCase(repository.NewPostRepository(db))
-	posts, err := postUseCase.GetUserPosts(userId)
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
 	}
 
 	response.JSON(w, http.StatusOK, posts)
 }
 
-func LikePost(w http.ResponseWriter, r *http.Request) {
+func (c *PostController) LikePost(w http.ResponseWriter, r *http.Request) {
 	//userId, err := authentication.ExtractUserId(r)
 	//if err != nil {
 	//	responses.Error(w, http.StatusUnauthorized, err)
@@ -219,16 +174,8 @@ func LikePost(w http.ResponseWriter, r *http.Request) {
 		response.Error(w, http.StatusBadRequest, err)
 		return
 	}
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
 
-	postUseCase := usecase.NewPostUseCase(repository.NewPostRepository(db))
-	err = postUseCase.LikePost(postId)
-	if err != nil {
+	if err = c.postUseCase.LikePost(postId); err != nil {
 		response.Error(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -236,23 +183,15 @@ func LikePost(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusNoContent, nil)
 }
 
-func UnlikePost(w http.ResponseWriter, r *http.Request) {
+func (c *PostController) UnlikePost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	postId, err := strconv.ParseUint(params["postId"], 10, 64)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, err)
 		return
 	}
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
 
-	postUseCase := usecase.NewPostUseCase(repository.NewPostRepository(db))
-	err = postUseCase.UnLikePost(postId)
-	if err != nil {
+	if err = c.postUseCase.UnLikePost(postId); err != nil {
 		response.Error(w, http.StatusInternalServerError, err)
 		return
 	}
