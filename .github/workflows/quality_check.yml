@@ -40,7 +40,7 @@ jobs:
       - name: Validate coverage
         run: |
           coverage=$(echo "${{ steps.coverage.outputs.percentage }}" | tr -d '%')
-          threshold=15
+          threshold=50
           if (( $(echo "$coverage < $threshold" | bc -l) )); then
             echo "Test coverage (${coverage}%) is below ${threshold}%"
             exit 1

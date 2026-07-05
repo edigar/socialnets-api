@@ -1,7 +1,11 @@
 package routes
 
 import (
+	"database/sql"
+	"github.com/edigar/socialnets-api/internal/controller"
 	"github.com/edigar/socialnets-api/internal/middleware"
+	"github.com/edigar/socialnets-api/internal/repository"
+	"github.com/edigar/socialnets-api/internal/usecase"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -13,10 +17,13 @@ type Route struct {
 	AuthenticationRequired bool
 }
 
-func Setup(r *mux.Router) *mux.Router {
-	routes := userRoutes
-	routes = append(routes, loginRoute)
-	routes = append(routes, postRoutes...)
+func Setup(r *mux.Router, db *sql.DB) *mux.Router {
+	userController := controller.NewUserController(usecase.NewUserUseCase(repository.NewUserRepository(db)))
+	postController := controller.NewPostController(usecase.NewPostUseCase(repository.NewPostRepository(db)))
+
+	routes := userRoutes(userController)
+	routes = append(routes, loginRoute(userController))
+	routes = append(routes, postRoutes(postController)...)
 	routes = append(routes, healthRoute)
 
 	for _, route := range routes {

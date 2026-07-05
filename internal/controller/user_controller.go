@@ -5,11 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/edigar/socialnets-api/internal/authentication"
-	"github.com/edigar/socialnets-api/internal/database"
 	"github.com/edigar/socialnets-api/internal/dto"
 	"github.com/edigar/socialnets-api/internal/entity"
 	"github.com/edigar/socialnets-api/internal/error_type"
-	"github.com/edigar/socialnets-api/internal/repository"
 	"github.com/edigar/socialnets-api/internal/response"
 	"github.com/edigar/socialnets-api/internal/usecase"
 	"github.com/gorilla/mux"
@@ -19,7 +17,7 @@ import (
 	"strings"
 )
 
-func PostUser(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) PostUser(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		response.Error(w, http.StatusUnprocessableEntity, err)
@@ -32,15 +30,7 @@ func PostUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
-
-	userUseCase := usecase.NewUserUseCase(repository.NewUserRepository(db))
-	if err = userUseCase.Register(&user); err != nil {
+	if err = c.userUseCase.Register(&user); err != nil {
 		var uve *errorType.ErrorUserValidation
 		if errors.As(err, &uve) {
 			response.Error(w, http.StatusBadRequest, uve.Err)
@@ -54,17 +44,10 @@ func PostUser(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusCreated, user)
 }
 
-func GetUsers(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
 	nameOrNick := strings.ToLower(r.URL.Query().Get("search"))
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
 
-	userUseCase := usecase.NewUserUseCase(repository.NewUserRepository(db))
-	users, err := userUseCase.GetByNameOrNick(nameOrNick)
+	users, err := c.userUseCase.GetByNameOrNick(nameOrNick)
 	if err != nil {
 		response.Error(w, http.StatusInternalServerError, err)
 		return
@@ -73,20 +56,11 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, users)
 }
 
-func GetUser(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userId := fmt.Sprintf("%s", params["userId"])
 
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
-
-	userUseCase := usecase.NewUserUseCase(repository.NewUserRepository(db))
-
-	user, err := userUseCase.GetById(userId)
+	user, err := c.userUseCase.GetById(userId)
 	if err != nil {
 		response.Error(w, http.StatusInternalServerError, err)
 		return
@@ -100,7 +74,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, user)
 }
 
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userId := fmt.Sprintf("%s", params["userId"])
 
@@ -126,15 +100,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
-
-	userUseCase := usecase.NewUserUseCase(repository.NewUserRepository(db))
-	if err = userUseCase.Update(userId, user); err != nil {
+	if err = c.userUseCase.Update(userId, user); err != nil {
 		var uve *errorType.ErrorUserValidation
 		if errors.As(err, &uve) {
 			response.Error(w, http.StatusBadRequest, uve.Err)
@@ -148,7 +114,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusNoContent, nil)
 }
 
-func DeleteUser(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userId := fmt.Sprintf("%s", params["userId"])
 
@@ -162,22 +128,15 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := database.Connect()
-	if err != nil {
+	if err = c.userUseCase.Delete(userId); err != nil {
 		response.Error(w, http.StatusInternalServerError, err)
 		return
-	}
-	defer db.Close()
-
-	userUseCase := usecase.NewUserUseCase(repository.NewUserRepository(db))
-	if err = userUseCase.Delete(userId); err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
 	}
 
 	response.JSON(w, http.StatusNoContent, nil)
 }
 
-func Follow(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) Follow(w http.ResponseWriter, r *http.Request) {
 	follower, err := authentication.ExtractUserId(r)
 	if err != nil {
 		response.Error(w, http.StatusUnauthorized, err)
@@ -187,15 +146,7 @@ func Follow(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userId := fmt.Sprintf("%s", params["userId"])
 
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
-
-	userUseCase := usecase.NewUserUseCase(repository.NewUserRepository(db))
-	if err = userUseCase.Follow(userId, follower); err != nil {
+	if err = c.userUseCase.Follow(userId, follower); err != nil {
 		if errors.Is(err, usecase.ErrOperationDenied) {
 			response.Error(w, http.StatusForbidden, err)
 			return
@@ -208,7 +159,7 @@ func Follow(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusNoContent, nil)
 }
 
-func Unfollow(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) Unfollow(w http.ResponseWriter, r *http.Request) {
 	follower, err := authentication.ExtractUserId(r)
 	if err != nil {
 		response.Error(w, http.StatusUnauthorized, err)
@@ -218,15 +169,7 @@ func Unfollow(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userId := fmt.Sprintf("%s", params["userId"])
 
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
-
-	userUseCase := usecase.NewUserUseCase(repository.NewUserRepository(db))
-	if err = userUseCase.Unfollow(userId, follower); err != nil {
+	if err = c.userUseCase.Unfollow(userId, follower); err != nil {
 		if errors.Is(err, usecase.ErrOperationDenied) {
 			response.Error(w, http.StatusForbidden, err)
 			return
@@ -239,19 +182,11 @@ func Unfollow(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusNoContent, nil)
 }
 
-func GetFollowers(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) GetFollowers(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userId := fmt.Sprintf("%s", params["userId"])
 
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
-
-	userUseCase := usecase.NewUserUseCase(repository.NewUserRepository(db))
-	followers, err := userUseCase.GetFollowers(userId)
+	followers, err := c.userUseCase.GetFollowers(userId)
 	if err != nil {
 		response.Error(w, http.StatusInternalServerError, err)
 		return
@@ -260,19 +195,11 @@ func GetFollowers(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, followers)
 }
 
-func GetFollowing(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) GetFollowing(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userId := fmt.Sprintf("%s", params["userId"])
 
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
-		return
-	}
-	defer db.Close()
-
-	userUseCase := usecase.NewUserUseCase(repository.NewUserRepository(db))
-	following, err := userUseCase.GetFollowing(userId)
+	following, err := c.userUseCase.GetFollowing(userId)
 	if err != nil {
 		response.Error(w, http.StatusInternalServerError, err)
 		return
@@ -281,7 +208,7 @@ func GetFollowing(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, following)
 }
 
-func UpdatePassword(w http.ResponseWriter, r *http.Request) {
+func (c *UserController) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userId := fmt.Sprintf("%s", params["userId"])
 
@@ -304,17 +231,10 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	var password dto.Password
 	if err = json.Unmarshal(body, &password); err != nil {
 		response.Error(w, http.StatusBadRequest, err)
-	}
-
-	db, err := database.Connect()
-	if err != nil {
-		response.Error(w, http.StatusInternalServerError, err)
 		return
 	}
-	defer db.Close()
 
-	userUseCase := usecase.NewUserUseCase(repository.NewUserRepository(db))
-	if err = userUseCase.UpdatePassword(userId, password); err != nil {
+	if err = c.userUseCase.UpdatePassword(userId, password); err != nil {
 		if errors.Is(err, usecase.ErrWrongPassword) {
 			response.Error(w, http.StatusUnauthorized, err)
 			return
