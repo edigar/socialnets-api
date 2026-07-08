@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 )
@@ -17,16 +19,16 @@ func TestPostPrepare(t *testing.T) {
 		createdAt := time.Now()
 		scenarios := []PostScenarios{
 			{
-				Post{1, "test title", "test content", AUTHOR_ID, "nick", 0, createdAt},
-				Post{1, "test title", "test content", AUTHOR_ID, "nick", 0, createdAt},
+				Post{1, "test title", "test content", AUTHOR_ID, "nick", 0, false, createdAt},
+				Post{1, "test title", "test content", AUTHOR_ID, "nick", 0, false, createdAt},
 			},
 			{
-				Post{1, "   test title   ", "  test content   ", AUTHOR_ID, "nick", 0, createdAt},
-				Post{1, "test title", "test content", AUTHOR_ID, "nick", 0, createdAt},
+				Post{1, "   test title   ", "  test content   ", AUTHOR_ID, "nick", 0, false, createdAt},
+				Post{1, "test title", "test content", AUTHOR_ID, "nick", 0, false, createdAt},
 			},
 			{
-				Post{1, " test  title ", " test  content ", AUTHOR_ID, "nick", 0, createdAt},
-				Post{1, "test  title", "test  content", AUTHOR_ID, "nick", 0, createdAt},
+				Post{1, " test  title ", " test  content ", AUTHOR_ID, "nick", 0, false, createdAt},
+				Post{1, "test  title", "test  content", AUTHOR_ID, "nick", 0, false, createdAt},
 			},
 		}
 
@@ -48,7 +50,7 @@ func TestPostPrepare(t *testing.T) {
 
 	t.Run("Should return error if title is empty", func(t *testing.T) {
 		createdAt := time.Now()
-		post := Post{1, "", "content", AUTHOR_ID, "nick", 0, createdAt}
+		post := Post{1, "", "content", AUTHOR_ID, "nick", 0, false, createdAt}
 		err := post.Prepare()
 
 		if err.Error() != "title is required" {
@@ -58,11 +60,28 @@ func TestPostPrepare(t *testing.T) {
 
 	t.Run("Should return error if content is empty", func(t *testing.T) {
 		createdAt := time.Now()
-		post := Post{1, "title", "", AUTHOR_ID, "nick", 0, createdAt}
+		post := Post{1, "title", "", AUTHOR_ID, "nick", 0, false, createdAt}
 		err := post.Prepare()
 
 		if err.Error() != "content is required" {
 			t.Errorf("Post prepare should return a 'content is required' error if content is empty. Error: %v", err)
 		}
 	})
+}
+
+func TestPostJSONExposesLikesAndLikedByMe(t *testing.T) {
+	post := Post{Id: 1, Title: "t", Content: "c", Likes: 3, LikedByMe: true}
+
+	b, err := json.Marshal(post)
+	if err != nil {
+		t.Fatalf("marshaling a post should not fail: %v", err)
+	}
+
+	s := string(b)
+	if !strings.Contains(s, `"likes":3`) {
+		t.Errorf("post JSON should expose likes. Got: %s", s)
+	}
+	if !strings.Contains(s, `"likedByMe":true`) {
+		t.Errorf("post JSON should expose likedByMe. Got: %s", s)
+	}
 }
