@@ -65,6 +65,11 @@ func (c *PostController) GetPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *PostController) GetPost(w http.ResponseWriter, r *http.Request) {
+	userId, err := authentication.ExtractUserId(r)
+	if err != nil {
+		response.Error(w, http.StatusUnauthorized, err)
+		return
+	}
 	params := mux.Vars(r)
 	postId, err := strconv.ParseUint(params["postId"], 10, 64)
 	if err != nil {
@@ -72,7 +77,7 @@ func (c *PostController) GetPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := c.postUseCase.GetById(postId)
+	post, err := c.postUseCase.GetById(postId, userId)
 	if err != nil {
 		response.Error(w, http.StatusInternalServerError, err)
 		return
@@ -150,10 +155,15 @@ func (c *PostController) DeletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *PostController) GetUserPosts(w http.ResponseWriter, r *http.Request) {
+	currentUserId, err := authentication.ExtractUserId(r)
+	if err != nil {
+		response.Error(w, http.StatusUnauthorized, err)
+		return
+	}
 	params := mux.Vars(r)
 	userId := fmt.Sprintf("%s", params["userId"])
 
-	posts, err := c.postUseCase.GetUserPosts(userId)
+	posts, err := c.postUseCase.GetUserPosts(userId, currentUserId)
 	if err != nil {
 		response.Error(w, http.StatusInternalServerError, err)
 		return
@@ -163,11 +173,11 @@ func (c *PostController) GetUserPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *PostController) LikePost(w http.ResponseWriter, r *http.Request) {
-	//userId, err := authentication.ExtractUserId(r)
-	//if err != nil {
-	//	responses.Error(w, http.StatusUnauthorized, err)
-	//	return
-	//}
+	userId, err := authentication.ExtractUserId(r)
+	if err != nil {
+		response.Error(w, http.StatusUnauthorized, err)
+		return
+	}
 	params := mux.Vars(r)
 	postId, err := strconv.ParseUint(params["postId"], 10, 64)
 	if err != nil {
@@ -175,7 +185,12 @@ func (c *PostController) LikePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = c.postUseCase.LikePost(postId); err != nil {
+	if err = c.postUseCase.LikePost(postId, userId); err != nil {
+		if errors.Is(err, usecase.ErrPostNotFound) {
+			response.Error(w, http.StatusNotFound, err)
+			return
+		}
+
 		response.Error(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -184,6 +199,11 @@ func (c *PostController) LikePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *PostController) UnlikePost(w http.ResponseWriter, r *http.Request) {
+	userId, err := authentication.ExtractUserId(r)
+	if err != nil {
+		response.Error(w, http.StatusUnauthorized, err)
+		return
+	}
 	params := mux.Vars(r)
 	postId, err := strconv.ParseUint(params["postId"], 10, 64)
 	if err != nil {
@@ -191,10 +211,27 @@ func (c *PostController) UnlikePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = c.postUseCase.UnLikePost(postId); err != nil {
+	if err = c.postUseCase.UnLikePost(postId, userId); err != nil {
 		response.Error(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	response.JSON(w, http.StatusNoContent, nil)
+}
+
+func (c *PostController) GetPostLikes(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	postId, err := strconv.ParseUint(params["postId"], 10, 64)
+	if err != nil {
+		response.Error(w, http.StatusBadRequest, err)
+		return
+	}
+
+	likers, err := c.postUseCase.GetLikers(postId)
+	if err != nil {
+		response.Error(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	response.JSON(w, http.StatusOK, likers)
 }

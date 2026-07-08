@@ -43,7 +43,7 @@ func (mr MockPostRepository) Create(post entity.Post) (uint64, error) {
 	return NEW_POST_ID, nil
 }
 
-func (mr MockPostRepository) FetchById(postId uint64) (entity.Post, error) {
+func (mr MockPostRepository) FetchById(postId uint64, currentUserId string) (entity.Post, error) {
 	for _, post := range MockPosts {
 		if post.Id == postId {
 			return post, nil
@@ -88,7 +88,7 @@ func (r MockPostRepository) Delete(postId uint64) error {
 	return sql.ErrNoRows
 }
 
-func (mr MockPostRepository) FetchUserPosts(userId string) ([]entity.Post, error) {
+func (mr MockPostRepository) FetchUserPosts(userId string, currentUserId string) ([]entity.Post, error) {
 	if userId == POST_ERROR {
 		return nil, errors.New("driver: bad connection")
 	}
@@ -103,24 +103,28 @@ func (mr MockPostRepository) FetchUserPosts(userId string) ([]entity.Post, error
 	return posts, nil
 }
 
-func (mr MockPostRepository) LikePost(postId uint64) error {
-	for i, post := range MockPosts {
-		if postId == post.Id {
-			MockPosts[i].Likes++
-			return nil
-		}
-	}
-
-	return sql.ErrNoRows
+func (mr MockPostRepository) Like(postId uint64, userId string) error {
+	return nil
 }
 
-func (mr MockPostRepository) UnlikePost(postId uint64) error {
-	for i, post := range MockPosts {
-		if postId == post.Id && post.Likes > 0 {
-			MockPosts[i].Likes--
-			return nil
+func (mr MockPostRepository) Unlike(postId uint64, userId string) error {
+	return nil
+}
+
+func (mr MockPostRepository) Exists(postId uint64) (bool, error) {
+	for _, post := range MockPosts {
+		if post.Id == postId {
+			return true, nil
 		}
 	}
 
-	return sql.ErrNoRows
+	return false, nil
+}
+
+func (mr MockPostRepository) FetchLikers(postId uint64) ([]entity.User, error) {
+	if postId == 0 {
+		return nil, errors.New("driver: bad connection")
+	}
+
+	return []entity.User{MockUsers[0]}, nil
 }

@@ -58,30 +58,40 @@ func (m *mockUserUseCase) UpdatePassword(userId string, password dto.Password) e
 type mockPostUseCase struct {
 	createPostFn   func(post *entity.Post) error
 	getByUserFn    func(userId string) ([]entity.Post, error)
-	getByIdFn      func(postId uint64) (entity.Post, error)
+	getByIdFn      func(postId uint64, currentUserId string) (entity.Post, error)
 	updateFn       func(authorId string, postId uint64, post entity.Post) error
 	deleteFn       func(postId uint64, authorId string) error
-	getUserPostsFn func(userId string) ([]entity.Post, error)
-	likePostFn     func(postId uint64) error
-	unLikePostFn   func(postId uint64) error
+	getUserPostsFn func(userId string, currentUserId string) ([]entity.Post, error)
+	likePostFn     func(postId uint64, userId string) error
+	unLikePostFn   func(postId uint64, userId string) error
+	getLikersFn    func(postId uint64) ([]entity.User, error)
 }
 
 func (m *mockPostUseCase) CreatePost(post *entity.Post) error { return m.createPostFn(post) }
 func (m *mockPostUseCase) GetByUser(userId string) ([]entity.Post, error) {
 	return m.getByUserFn(userId)
 }
-func (m *mockPostUseCase) GetById(postId uint64) (entity.Post, error) { return m.getByIdFn(postId) }
+func (m *mockPostUseCase) GetById(postId uint64, currentUserId string) (entity.Post, error) {
+	return m.getByIdFn(postId, currentUserId)
+}
 func (m *mockPostUseCase) Update(authorId string, postId uint64, post entity.Post) error {
 	return m.updateFn(authorId, postId, post)
 }
 func (m *mockPostUseCase) Delete(postId uint64, authorId string) error {
 	return m.deleteFn(postId, authorId)
 }
-func (m *mockPostUseCase) GetUserPosts(userId string) ([]entity.Post, error) {
-	return m.getUserPostsFn(userId)
+func (m *mockPostUseCase) GetUserPosts(userId string, currentUserId string) ([]entity.Post, error) {
+	return m.getUserPostsFn(userId, currentUserId)
 }
-func (m *mockPostUseCase) LikePost(postId uint64) error   { return m.likePostFn(postId) }
-func (m *mockPostUseCase) UnLikePost(postId uint64) error { return m.unLikePostFn(postId) }
+func (m *mockPostUseCase) LikePost(postId uint64, userId string) error {
+	return m.likePostFn(postId, userId)
+}
+func (m *mockPostUseCase) UnLikePost(postId uint64, userId string) error {
+	return m.unLikePostFn(postId, userId)
+}
+func (m *mockPostUseCase) GetLikers(postId uint64) ([]entity.User, error) {
+	return m.getLikersFn(postId)
+}
 
 // --- request helpers ---
 

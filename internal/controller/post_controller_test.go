@@ -82,30 +82,41 @@ func TestGetPosts(t *testing.T) {
 }
 
 func TestGetPost(t *testing.T) {
+	t.Run("Should return 401 without a token", func(t *testing.T) {
+		c := NewPostController(&mockPostUseCase{})
+		rec := httptest.NewRecorder()
+		req := withVars(newRequest(http.MethodGet, ""), map[string]string{"postId": "1"})
+		c.GetPost(rec, req)
+		assertStatus(t, rec.Code, http.StatusUnauthorized)
+	})
+
 	t.Run("Should return 400 for a non-numeric post id", func(t *testing.T) {
 		c := NewPostController(&mockPostUseCase{})
 		rec := httptest.NewRecorder()
 		req := withVars(newRequest(http.MethodGet, ""), map[string]string{"postId": "abc"})
+		req = withAuth(req, testUserID)
 		c.GetPost(rec, req)
 		assertStatus(t, rec.Code, http.StatusBadRequest)
 	})
 
-	t.Run("Should return 200 on success", func(t *testing.T) {
-		c := NewPostController(&mockPostUseCase{getByIdFn: func(uint64) (entity.Post, error) {
-			return entity.Post{Id: 1}, nil
+	t.Run("Should return 200 with likedByMe on success", func(t *testing.T) {
+		c := NewPostController(&mockPostUseCase{getByIdFn: func(uint64, string) (entity.Post, error) {
+			return entity.Post{Id: 1, LikedByMe: true}, nil
 		}})
 		rec := httptest.NewRecorder()
 		req := withVars(newRequest(http.MethodGet, ""), map[string]string{"postId": "1"})
+		req = withAuth(req, testUserID)
 		c.GetPost(rec, req)
 		assertStatus(t, rec.Code, http.StatusOK)
 	})
 
 	t.Run("Should return 500 on error", func(t *testing.T) {
-		c := NewPostController(&mockPostUseCase{getByIdFn: func(uint64) (entity.Post, error) {
+		c := NewPostController(&mockPostUseCase{getByIdFn: func(uint64, string) (entity.Post, error) {
 			return entity.Post{}, errors.New("db down")
 		}})
 		rec := httptest.NewRecorder()
 		req := withVars(newRequest(http.MethodGet, ""), map[string]string{"postId": "1"})
+		req = withAuth(req, testUserID)
 		c.GetPost(rec, req)
 		assertStatus(t, rec.Code, http.StatusInternalServerError)
 	})
@@ -234,75 +245,152 @@ func TestDeletePost(t *testing.T) {
 }
 
 func TestGetUserPosts(t *testing.T) {
+	t.Run("Should return 401 without a token", func(t *testing.T) {
+		c := NewPostController(&mockPostUseCase{})
+		rec := httptest.NewRecorder()
+		req := withVars(newRequest(http.MethodGet, ""), map[string]string{"userId": testUserID})
+		c.GetUserPosts(rec, req)
+		assertStatus(t, rec.Code, http.StatusUnauthorized)
+	})
+
 	t.Run("Should return 200 on success", func(t *testing.T) {
-		c := NewPostController(&mockPostUseCase{getUserPostsFn: func(string) ([]entity.Post, error) {
+		c := NewPostController(&mockPostUseCase{getUserPostsFn: func(string, string) ([]entity.Post, error) {
 			return []entity.Post{}, nil
 		}})
 		rec := httptest.NewRecorder()
 		req := withVars(newRequest(http.MethodGet, ""), map[string]string{"userId": testUserID})
+		req = withAuth(req, testUserID)
 		c.GetUserPosts(rec, req)
 		assertStatus(t, rec.Code, http.StatusOK)
 	})
 
 	t.Run("Should return 500 on error", func(t *testing.T) {
-		c := NewPostController(&mockPostUseCase{getUserPostsFn: func(string) ([]entity.Post, error) {
+		c := NewPostController(&mockPostUseCase{getUserPostsFn: func(string, string) ([]entity.Post, error) {
 			return nil, errors.New("db down")
 		}})
 		rec := httptest.NewRecorder()
 		req := withVars(newRequest(http.MethodGet, ""), map[string]string{"userId": testUserID})
+		req = withAuth(req, testUserID)
 		c.GetUserPosts(rec, req)
 		assertStatus(t, rec.Code, http.StatusInternalServerError)
 	})
 }
 
 func TestLikePost(t *testing.T) {
+	t.Run("Should return 401 without a token", func(t *testing.T) {
+		c := NewPostController(&mockPostUseCase{})
+		rec := httptest.NewRecorder()
+		req := withVars(newRequest(http.MethodPost, ""), map[string]string{"postId": "1"})
+		c.LikePost(rec, req)
+		assertStatus(t, rec.Code, http.StatusUnauthorized)
+	})
+
 	t.Run("Should return 400 for a non-numeric post id", func(t *testing.T) {
 		c := NewPostController(&mockPostUseCase{})
 		rec := httptest.NewRecorder()
 		req := withVars(newRequest(http.MethodPost, ""), map[string]string{"postId": "abc"})
+		req = withAuth(req, testUserID)
 		c.LikePost(rec, req)
 		assertStatus(t, rec.Code, http.StatusBadRequest)
 	})
 
-	t.Run("Should return 204 on success", func(t *testing.T) {
-		c := NewPostController(&mockPostUseCase{likePostFn: func(uint64) error { return nil }})
+	t.Run("Should return 404 when the post does not exist", func(t *testing.T) {
+		c := NewPostController(&mockPostUseCase{likePostFn: func(uint64, string) error {
+			return usecase.ErrPostNotFound
+		}})
 		rec := httptest.NewRecorder()
 		req := withVars(newRequest(http.MethodPost, ""), map[string]string{"postId": "1"})
+		req = withAuth(req, testUserID)
+		c.LikePost(rec, req)
+		assertStatus(t, rec.Code, http.StatusNotFound)
+	})
+
+	t.Run("Should return 204 on success", func(t *testing.T) {
+		c := NewPostController(&mockPostUseCase{likePostFn: func(uint64, string) error { return nil }})
+		rec := httptest.NewRecorder()
+		req := withVars(newRequest(http.MethodPost, ""), map[string]string{"postId": "1"})
+		req = withAuth(req, testUserID)
 		c.LikePost(rec, req)
 		assertStatus(t, rec.Code, http.StatusNoContent)
 	})
 
-	t.Run("Should return 500 on error", func(t *testing.T) {
-		c := NewPostController(&mockPostUseCase{likePostFn: func(uint64) error { return errors.New("db down") }})
+	t.Run("Should return 500 on unexpected error", func(t *testing.T) {
+		c := NewPostController(&mockPostUseCase{likePostFn: func(uint64, string) error {
+			return errors.New("db down")
+		}})
 		rec := httptest.NewRecorder()
 		req := withVars(newRequest(http.MethodPost, ""), map[string]string{"postId": "1"})
+		req = withAuth(req, testUserID)
 		c.LikePost(rec, req)
 		assertStatus(t, rec.Code, http.StatusInternalServerError)
 	})
 }
 
 func TestUnlikePost(t *testing.T) {
+	t.Run("Should return 401 without a token", func(t *testing.T) {
+		c := NewPostController(&mockPostUseCase{})
+		rec := httptest.NewRecorder()
+		req := withVars(newRequest(http.MethodPost, ""), map[string]string{"postId": "1"})
+		c.UnlikePost(rec, req)
+		assertStatus(t, rec.Code, http.StatusUnauthorized)
+	})
+
 	t.Run("Should return 400 for a non-numeric post id", func(t *testing.T) {
 		c := NewPostController(&mockPostUseCase{})
 		rec := httptest.NewRecorder()
 		req := withVars(newRequest(http.MethodPost, ""), map[string]string{"postId": "abc"})
+		req = withAuth(req, testUserID)
 		c.UnlikePost(rec, req)
 		assertStatus(t, rec.Code, http.StatusBadRequest)
 	})
 
 	t.Run("Should return 204 on success", func(t *testing.T) {
-		c := NewPostController(&mockPostUseCase{unLikePostFn: func(uint64) error { return nil }})
+		c := NewPostController(&mockPostUseCase{unLikePostFn: func(uint64, string) error { return nil }})
 		rec := httptest.NewRecorder()
 		req := withVars(newRequest(http.MethodPost, ""), map[string]string{"postId": "1"})
+		req = withAuth(req, testUserID)
 		c.UnlikePost(rec, req)
 		assertStatus(t, rec.Code, http.StatusNoContent)
 	})
 
-	t.Run("Should return 500 on error", func(t *testing.T) {
-		c := NewPostController(&mockPostUseCase{unLikePostFn: func(uint64) error { return errors.New("db down") }})
+	t.Run("Should return 500 on unexpected error", func(t *testing.T) {
+		c := NewPostController(&mockPostUseCase{unLikePostFn: func(uint64, string) error {
+			return errors.New("db down")
+		}})
 		rec := httptest.NewRecorder()
 		req := withVars(newRequest(http.MethodPost, ""), map[string]string{"postId": "1"})
+		req = withAuth(req, testUserID)
 		c.UnlikePost(rec, req)
+		assertStatus(t, rec.Code, http.StatusInternalServerError)
+	})
+}
+
+func TestGetPostLikes(t *testing.T) {
+	t.Run("Should return 400 for a non-numeric post id", func(t *testing.T) {
+		c := NewPostController(&mockPostUseCase{})
+		rec := httptest.NewRecorder()
+		req := withVars(newRequest(http.MethodGet, ""), map[string]string{"postId": "abc"})
+		c.GetPostLikes(rec, req)
+		assertStatus(t, rec.Code, http.StatusBadRequest)
+	})
+
+	t.Run("Should return 200 with the likers", func(t *testing.T) {
+		c := NewPostController(&mockPostUseCase{getLikersFn: func(uint64) ([]entity.User, error) {
+			return []entity.User{{Id: testUserID}}, nil
+		}})
+		rec := httptest.NewRecorder()
+		req := withVars(newRequest(http.MethodGet, ""), map[string]string{"postId": "1"})
+		c.GetPostLikes(rec, req)
+		assertStatus(t, rec.Code, http.StatusOK)
+	})
+
+	t.Run("Should return 500 on error", func(t *testing.T) {
+		c := NewPostController(&mockPostUseCase{getLikersFn: func(uint64) ([]entity.User, error) {
+			return nil, errors.New("db down")
+		}})
+		rec := httptest.NewRecorder()
+		req := withVars(newRequest(http.MethodGet, ""), map[string]string{"postId": "1"})
+		c.GetPostLikes(rec, req)
 		assertStatus(t, rec.Code, http.StatusInternalServerError)
 	})
 }
