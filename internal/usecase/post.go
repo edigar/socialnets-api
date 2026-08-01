@@ -6,7 +6,10 @@ import (
 	"github.com/edigar/socialnets-api/internal/repository"
 )
 
-var ErrAccessDenied = errors.New("access denied")
+var (
+	ErrAccessDenied = errors.New("access denied")
+	ErrPostNotFound = errors.New("post not found")
+)
 
 type PostUseCase struct {
 	postRepository repository.Post
@@ -41,8 +44,8 @@ func (p *PostUseCase) GetByUser(userId string) ([]entity.Post, error) {
 	return posts, nil
 }
 
-func (p *PostUseCase) GetById(postId uint64) (entity.Post, error) {
-	post, err := p.postRepository.FetchById(postId)
+func (p *PostUseCase) GetById(postId uint64, currentUserId string) (entity.Post, error) {
+	post, err := p.postRepository.FetchById(postId, currentUserId)
 	if err != nil {
 		return entity.Post{}, nil
 	}
@@ -53,7 +56,7 @@ func (p *PostUseCase) Update(authorId string, postId uint64, post entity.Post) e
 	if err := post.Prepare(); err != nil {
 		return err
 	}
-	postDb, err := p.postRepository.FetchById(postId)
+	postDb, err := p.postRepository.FetchById(postId, authorId)
 	if err != nil {
 		return err
 	}
@@ -69,7 +72,7 @@ func (p *PostUseCase) Update(authorId string, postId uint64, post entity.Post) e
 }
 
 func (p *PostUseCase) Delete(postId uint64, authorId string) error {
-	postDb, err := p.postRepository.FetchById(postId)
+	postDb, err := p.postRepository.FetchById(postId, authorId)
 	if err != nil {
 		return err
 	}
@@ -83,8 +86,8 @@ func (p *PostUseCase) Delete(postId uint64, authorId string) error {
 	return nil
 }
 
-func (p *PostUseCase) GetUserPosts(userId string) ([]entity.Post, error) {
-	posts, err := p.postRepository.FetchUserPosts(userId)
+func (p *PostUseCase) GetUserPosts(userId string, currentUserId string) ([]entity.Post, error) {
+	posts, err := p.postRepository.FetchUserPosts(userId, currentUserId)
 	if err != nil {
 		return nil, err
 	}
@@ -92,18 +95,22 @@ func (p *PostUseCase) GetUserPosts(userId string) ([]entity.Post, error) {
 	return posts, nil
 }
 
-func (p *PostUseCase) LikePost(postId uint64) error {
-	if err := p.postRepository.LikePost(postId); err != nil {
+func (p *PostUseCase) LikePost(postId uint64, userId string) error {
+	exists, err := p.postRepository.Exists(postId)
+	if err != nil {
 		return err
 	}
+	if !exists {
+		return ErrPostNotFound
+	}
 
-	return nil
+	return p.postRepository.Like(postId, userId)
 }
 
-func (p *PostUseCase) UnLikePost(postId uint64) error {
-	if err := p.postRepository.UnlikePost(postId); err != nil {
-		return err
-	}
+func (p *PostUseCase) UnLikePost(postId uint64, userId string) error {
+	return p.postRepository.Unlike(postId, userId)
+}
 
-	return nil
+func (p *PostUseCase) GetLikers(postId uint64) ([]entity.User, error) {
+	return p.postRepository.FetchLikers(postId)
 }

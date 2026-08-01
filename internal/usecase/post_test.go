@@ -88,7 +88,7 @@ func TestGetById(t *testing.T) {
 	t.Run("Should get a post by id", func(t *testing.T) {
 		postId := usecase.MockPosts[0].Id
 		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
-		post, err := postUseCase.GetById(postId)
+		post, err := postUseCase.GetById(postId, usecase.MockUsers[0].Id)
 		if err != nil {
 			t.Errorf("GetById should not return an error for a valid id. Post id: %v. Error: %v", postId, err)
 		}
@@ -101,7 +101,7 @@ func TestGetById(t *testing.T) {
 	t.Run("Should get empty Post if id is invalid", func(t *testing.T) {
 		postId := uint64(99)
 		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
-		post, err := postUseCase.GetById(postId)
+		post, err := postUseCase.GetById(postId, usecase.MockUsers[0].Id)
 		if err != nil {
 			t.Errorf("GetById should not return an error for a non-valid id. Post id: %v. Error: %v", postId, err)
 		}
@@ -198,7 +198,7 @@ func TestGetUserPosts(t *testing.T) {
 	t.Run("Should get user posts by id", func(t *testing.T) {
 		userId := usecase.MockPosts[1].AuthorId
 		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
-		posts, err := postUseCase.GetUserPosts(userId)
+		posts, err := postUseCase.GetUserPosts(userId, usecase.MockUsers[0].Id)
 		if err != nil {
 			t.Errorf("GetByUser should not return an error for a valid user id. User: %v. Error: %v", userId, err)
 		}
@@ -217,7 +217,7 @@ func TestGetUserPosts(t *testing.T) {
 	t.Run("Should get a bad connection database error", func(t *testing.T) {
 		userId := usecase.POST_ERROR
 		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
-		posts, err := postUseCase.GetUserPosts(userId)
+		posts, err := postUseCase.GetUserPosts(userId, usecase.MockUsers[0].Id)
 		if err.Error() != "driver: bad connection" {
 			t.Errorf("GetByUser should get a bad connection error. Expected: %v. Got: %v", "driver: bad connection", err)
 		}
@@ -229,54 +229,53 @@ func TestGetUserPosts(t *testing.T) {
 }
 
 func TestLikePost(t *testing.T) {
-	t.Run("Should like a post", func(t *testing.T) {
-		postId := usecase.MockPosts[0].Id
+	t.Run("Should like an existing post", func(t *testing.T) {
 		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
-		err := postUseCase.LikePost(postId)
+		err := postUseCase.LikePost(usecase.MockPosts[0].Id, usecase.MockUsers[0].Id)
 		if err != nil {
-			t.Errorf("LikePost should not return error for a valid post. Error: %v", err)
+			t.Errorf("LikePost should not return an error for an existing post. Error: %v", err)
 		}
-
-		if usecase.MockPosts[0].Likes != 1 {
-			t.Errorf("LikePost should increase like to 1. Got: %v", usecase.MockPosts[0].Likes)
-		}
-
-		usecase.MockPosts[0].Likes = 0
 	})
 
-	t.Run("Should not like a post with non-valid id", func(t *testing.T) {
-		postId := uint64(99)
+	t.Run("Should return ErrPostNotFound for a non-existent post", func(t *testing.T) {
 		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
-		err := postUseCase.LikePost(postId)
-		if !errors.Is(err, sql.ErrNoRows) {
-			t.Errorf("LikePost should return sql.ErrNoRows error with non-valid id. Error: %v", err)
+		err := postUseCase.LikePost(99, usecase.MockUsers[0].Id)
+		if !errors.Is(err, ErrPostNotFound) {
+			t.Errorf("LikePost should return ErrPostNotFound for a non-existent post. Got: %v", err)
 		}
 	})
 }
 
 func TestUnLikePost(t *testing.T) {
 	t.Run("Should unlike a post", func(t *testing.T) {
-		usecase.MockPosts[0].Likes = 2
-		postId := usecase.MockPosts[0].Id
 		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
-		err := postUseCase.UnLikePost(postId)
+		err := postUseCase.UnLikePost(usecase.MockPosts[0].Id, usecase.MockUsers[0].Id)
 		if err != nil {
-			t.Errorf("UnLikePost should not return error for a valid post. Error: %v", err)
+			t.Errorf("UnLikePost should not return an error. Error: %v", err)
 		}
+	})
+}
 
-		if usecase.MockPosts[0].Likes != 1 {
-			t.Errorf("LikePost should decrease like to 1. Got: %v", usecase.MockPosts[0].Likes)
+func TestGetLikers(t *testing.T) {
+	t.Run("Should return the users who liked the post", func(t *testing.T) {
+		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
+		likers, err := postUseCase.GetLikers(usecase.MockPosts[0].Id)
+		if err != nil {
+			t.Errorf("GetLikers should not return an error. Error: %v", err)
 		}
-
-		usecase.MockPosts[0].Likes = 0
+		if len(likers) != 1 {
+			t.Errorf("GetLikers should return the likers. Got: %v", likers)
+		}
 	})
 
-	t.Run("Should not unlike a post with non-valid id", func(t *testing.T) {
-		postId := uint64(99)
+	t.Run("Should return an error on db failure", func(t *testing.T) {
 		postUseCase := NewPostUseCase(usecase.NewMockPostRepository())
-		err := postUseCase.UnLikePost(postId)
-		if !errors.Is(err, sql.ErrNoRows) {
-			t.Errorf("UnLikePost should return sql.ErrNoRows error with non-valid id. Error: %v", err)
+		likers, err := postUseCase.GetLikers(0)
+		if err == nil {
+			t.Errorf("GetLikers should return an error on db failure")
+		}
+		if likers != nil {
+			t.Errorf("GetLikers should return nil likers on error. Got: %v", likers)
 		}
 	})
 }

@@ -24,12 +24,13 @@ type UserUseCase interface {
 type PostUseCase interface {
 	CreatePost(post *entity.Post) error
 	GetByUser(userId string) ([]entity.Post, error)
-	GetById(postId uint64) (entity.Post, error)
+	GetById(postId uint64, currentUserId string) (entity.Post, error)
 	Update(authorId string, postId uint64, post entity.Post) error
 	Delete(postId uint64, authorId string) error
-	GetUserPosts(userId string) ([]entity.Post, error)
-	LikePost(postId uint64) error
-	UnLikePost(postId uint64) error
+	GetUserPosts(userId string, currentUserId string) ([]entity.Post, error)
+	LikePost(postId uint64, userId string) error
+	UnLikePost(postId uint64, userId string) error
+	GetLikers(postId uint64) ([]entity.User, error)
 }
 
 type UserController struct {

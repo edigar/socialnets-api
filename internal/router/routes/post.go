@@ -55,5 +55,11 @@ func postRoutes(c *controller.PostController) []Route {
 			Function:               c.UnlikePost,
 			AuthenticationRequired: true,
 		},
+		{
+			URI:                    "/api/post/{postId}/likes",
+			Method:                 http.MethodGet,
+			Function:               c.GetPostLikes,
+			AuthenticationRequired: true,
+		},
 	}
 }

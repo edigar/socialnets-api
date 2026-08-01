@@ -13,6 +13,7 @@ type Post struct {
 	AuthorId   string    `json:"authorId,omitempty"`
 	AuthorNick string    `json:"authorNick,omitempty"`
 	Likes      uint64    `json:"likes"`
+	LikedByMe  bool      `json:"likedByMe"`
 	CreatedAt  time.Time `json:"createdAt,omitempty"`
 }
 

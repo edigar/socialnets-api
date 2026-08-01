@@ -2,6 +2,7 @@ SELECT 'CREATE DATABASE socialnets'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'socialnets')\gexec
 \c socialnets
 
+DROP TABLE IF EXISTS post_likes;
 DROP TABLE IF EXISTS posts;
 DROP TABLE IF EXISTS followers;
 DROP TABLE IF EXISTS users;
@@ -31,9 +32,16 @@ CREATE TABLE posts (
     title varchar(100) NOT NULL,
     content varchar(500) NOT NULL,
     author uuid NOT NULL,
-    likes int DEFAULT 0,
     created_at timestamp default current_timestamp,
     FOREIGN KEY (author) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE post_likes (
+    post_id    int  NOT NULL,
+    user_id    uuid NOT NULL,
+    created_at timestamp DEFAULT current_timestamp,
+    PRIMARY KEY (post_id, user_id),
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
